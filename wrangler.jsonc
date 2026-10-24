@@ -10,14 +10,15 @@
 	"observability": {
 		"enabled": true
 	},
- 	"upload_source_maps": true,
- 	"d1_databases": [
- 		{
- 			"binding": "DB",
- 			"database_name": "my-first-worker-db",
- 			"migrations_dir": "drizzle"
- 		}
- 	]
+	"upload_source_maps": true,
+	"d1_databases": [
+		{
+			"binding": "DB",
+			"database_name": "my-first-worker-db",
+			"migrations_dir": "drizzle",
+			"database_id": "dec06a7b-8231-4224-8797-10ae13307c4f"
+		}
+	]
 	/**
 	 * Smart Placement
 	 * https://developers.cloudflare.com/workers/configuration/smart-placement/#smart-placement
