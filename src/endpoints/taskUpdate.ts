@@ -1,9 +1,8 @@
-import { NotFoundException, OpenAPIRoute } from "chanfana";
+import { OpenAPIRoute } from "chanfana";
 import { z } from "zod";
-import { eq } from "drizzle-orm";
-import { type AppContext, Task } from "../types";
-import { createDb } from "../db";
-import { tasks } from "../db/schema";
+import { type AppContext } from "../shared/types";
+import { Task } from "../types";
+import { success } from "../shared/http";
 
 export class TaskUpdate extends OpenAPIRoute {
 	schema = {
@@ -48,34 +47,8 @@ export class TaskUpdate extends OpenAPIRoute {
 		const { taskSlug } = data.params;
 		const updates = data.body;
 
-		const db = createDb(c.env.DB);
+		const task = await c.get("services").tasks.update(taskSlug, updates);
 
-		const setValues: Record<string, unknown> = {};
-		if (updates.name !== undefined) setValues.name = updates.name;
-		if (updates.slug !== undefined) setValues.slug = updates.slug;
-		if (updates.description !== undefined) setValues.description = updates.description;
-		if (updates.completed !== undefined) setValues.completed = updates.completed;
-		if (updates.due_date !== undefined) setValues.dueDate = updates.due_date;
-
-		const [updated] = await db
-			.update(tasks)
-			.set(setValues)
-			.where(eq(tasks.slug, taskSlug))
-			.returning();
-
-		if (!updated) {
-			throw new NotFoundException();
-		}
-
-		return {
-			success: true,
-			task: {
-				name: updated.name,
-				slug: updated.slug,
-				description: updated.description ?? undefined,
-				completed: updated.completed,
-				due_date: updated.dueDate,
-			},
-		};
+		return success({ task });
 	}
 }

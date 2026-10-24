@@ -1,9 +1,8 @@
-import { NotFoundException, OpenAPIRoute } from "chanfana";
+import { OpenAPIRoute } from "chanfana";
 import { z } from "zod";
-import { eq } from "drizzle-orm";
-import { type AppContext, Task } from "../types";
-import { createDb } from "../db";
-import { tasks } from "../db/schema";
+import { type AppContext } from "../shared/types";
+import { Task } from "../types";
+import { success } from "../shared/http";
 
 export class TaskDelete extends OpenAPIRoute {
 	schema = {
@@ -21,9 +20,7 @@ export class TaskDelete extends OpenAPIRoute {
 					"application/json": {
 						schema: z.object({
 							success: z.boolean(),
-							result: z.object({
-								task: Task,
-							}),
+							task: Task,
 						}),
 					},
 				},
@@ -36,28 +33,8 @@ export class TaskDelete extends OpenAPIRoute {
 
 		const { taskSlug } = data.params;
 
-		const db = createDb(c.env.DB);
+		const task = await c.get("services").tasks.delete(taskSlug);
 
-		const [deleted] = await db
-			.delete(tasks)
-			.where(eq(tasks.slug, taskSlug))
-			.returning();
-
-		if (!deleted) {
-			throw new NotFoundException();
-		}
-
-		return {
-			result: {
-				task: {
-					name: deleted.name,
-					slug: deleted.slug,
-					description: deleted.description ?? undefined,
-					completed: deleted.completed,
-					due_date: deleted.dueDate,
-				},
-			},
-			success: true,
-		};
+		return success({ task });
 	}
 }

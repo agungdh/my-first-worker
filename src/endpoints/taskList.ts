@@ -1,9 +1,8 @@
 import { OpenAPIRoute } from "chanfana";
 import { z } from "zod";
-import { eq } from "drizzle-orm";
-import { type AppContext, Task } from "../types";
-import { createDb } from "../db";
-import { tasks } from "../db/schema";
+import { type AppContext } from "../shared/types";
+import { Task } from "../types";
+import { success } from "../shared/http";
 
 export class TaskList extends OpenAPIRoute {
 	schema = {
@@ -38,29 +37,8 @@ export class TaskList extends OpenAPIRoute {
 
 		const { page, isCompleted } = data.query;
 
-		const db = createDb(c.env.DB);
+		const tasks = await c.get("services").tasks.list(page, isCompleted);
 
-		const pageSize = 20;
-		let query = db.select().from(tasks);
-		if (isCompleted !== undefined) {
-			query = query.where(eq(tasks.completed, isCompleted)) as typeof query;
-		}
-		const rows = await query
-			.limit(pageSize)
-			.offset(page * pageSize)
-			.all();
-
-		const resultTasks = rows.map((row) => ({
-			name: row.name,
-			slug: row.slug,
-			description: row.description ?? undefined,
-			completed: row.completed,
-			due_date: row.dueDate,
-		}));
-
-		return {
-			success: true,
-			tasks: resultTasks,
-		};
+		return success({ tasks });
 	}
 }

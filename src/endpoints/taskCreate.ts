@@ -1,8 +1,8 @@
 import { OpenAPIRoute } from "chanfana";
 import { z } from "zod";
-import { type AppContext, Task } from "../types";
-import { createDb } from "../db";
-import { tasks } from "../db/schema";
+import { type AppContext } from "../shared/types";
+import { Task } from "../types";
+import { success } from "../shared/http";
 
 export class TaskCreate extends OpenAPIRoute {
 	schema = {
@@ -37,35 +37,15 @@ export class TaskCreate extends OpenAPIRoute {
 
 		const taskToCreate = data.body;
 
-		const db = createDb(c.env.DB);
+		const service = c.get("services").tasks;
+		const task = await service.create({
+			name: taskToCreate.name,
+			slug: taskToCreate.slug,
+			description: taskToCreate.description,
+			completed: taskToCreate.completed,
+			due_date: taskToCreate.due_date,
+		});
 
-		const [created] = await db
-			.insert(tasks)
-			.values({
-				name: taskToCreate.name,
-				slug: taskToCreate.slug,
-				description: taskToCreate.description,
-				completed: taskToCreate.completed,
-				dueDate: taskToCreate.due_date,
-			})
-			.returning();
-
-		if (!created) {
-			throw new Error("Failed to create task");
-		}
-
-		return c.json(
-			{
-				success: true,
-				task: {
-					name: created.name,
-					slug: created.slug,
-					description: created.description ?? undefined,
-					completed: created.completed,
-					due_date: created.dueDate,
-				},
-			},
-			201,
-		);
+		return c.json(success({ task }), 201);
 	}
 }
