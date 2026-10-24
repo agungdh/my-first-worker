@@ -10,11 +10,14 @@
   },
   "dependencies": {
     "chanfana": "^3.3.0",
+    "drizzle-orm": "^0.45.4",
     "hono": "^4.12.12",
     "zod": "^4.3.6"
   },
   "devDependencies": {
     "@types/node": "^25.9.9",
+    "drizzle-kit": "^0.31.11",
+    "typescript": "^7.0.2",
     "wrangler": "^4.152.0"
   }
 }

@@ -1,6 +1,8 @@
 import { OpenAPIRoute } from "chanfana";
 import { z } from "zod";
 import { type AppContext, Task } from "../types";
+import { createDb } from "../db";
+import { tasks } from "../db/schema";
 
 export class TaskCreate extends OpenAPIRoute {
 	schema = {
@@ -31,24 +33,36 @@ export class TaskCreate extends OpenAPIRoute {
 	};
 
 	async handle(c: AppContext) {
-		// Get validated data
 		const data = await this.getValidatedData<typeof this.schema>();
 
-		// Retrieve the validated request body
 		const taskToCreate = data.body;
 
-		// Implement your own object insertion here
+		const db = createDb(c.env.DB);
 
-		// return the new task
+		const [created] = await db
+			.insert(tasks)
+			.values({
+				name: taskToCreate.name,
+				slug: taskToCreate.slug,
+				description: taskToCreate.description,
+				completed: taskToCreate.completed,
+				dueDate: taskToCreate.due_date,
+			})
+			.returning();
+
+		if (!created) {
+			throw new Error("Failed to create task");
+		}
+
 		return c.json(
 			{
 				success: true,
 				task: {
-					name: taskToCreate.name,
-					slug: taskToCreate.slug,
-					description: taskToCreate.description,
-					completed: taskToCreate.completed,
-					due_date: taskToCreate.due_date,
+					name: created.name,
+					slug: created.slug,
+					description: created.description ?? undefined,
+					completed: created.completed,
+					due_date: created.dueDate,
 				},
 			},
 			201,

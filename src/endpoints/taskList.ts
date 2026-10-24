@@ -1,6 +1,9 @@
 import { OpenAPIRoute } from "chanfana";
 import { z } from "zod";
+import { eq } from "drizzle-orm";
 import { type AppContext, Task } from "../types";
+import { createDb } from "../db";
+import { tasks } from "../db/schema";
 
 export class TaskList extends OpenAPIRoute {
 	schema = {
@@ -31,32 +34,33 @@ export class TaskList extends OpenAPIRoute {
 	};
 
 	async handle(c: AppContext) {
-		// Get validated data
 		const data = await this.getValidatedData<typeof this.schema>();
 
-		// Retrieve the validated parameters
 		const { page, isCompleted } = data.query;
 
-		// Implement your own object list here
+		const db = createDb(c.env.DB);
+
+		const pageSize = 20;
+		let query = db.select().from(tasks);
+		if (isCompleted !== undefined) {
+			query = query.where(eq(tasks.completed, isCompleted)) as typeof query;
+		}
+		const rows = await query
+			.limit(pageSize)
+			.offset(page * pageSize)
+			.all();
+
+		const resultTasks = rows.map((row) => ({
+			name: row.name,
+			slug: row.slug,
+			description: row.description ?? undefined,
+			completed: row.completed,
+			due_date: row.dueDate,
+		}));
 
 		return {
 			success: true,
-			tasks: [
-				{
-					name: "Clean my room",
-					slug: "clean-room",
-					description: undefined,
-					completed: false,
-					due_date: "2025-01-05",
-				},
-				{
-					name: "Build something awesome with Cloudflare Workers",
-					slug: "cloudflare-workers",
-					description: "Lorem Ipsum",
-					completed: true,
-					due_date: "2022-12-24",
-				},
-			],
+			tasks: resultTasks,
 		};
 	}
 }

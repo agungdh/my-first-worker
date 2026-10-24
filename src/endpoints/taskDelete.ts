@@ -1,6 +1,9 @@
-import { OpenAPIRoute } from "chanfana";
+import { NotFoundException, OpenAPIRoute } from "chanfana";
 import { z } from "zod";
+import { eq } from "drizzle-orm";
 import { type AppContext, Task } from "../types";
+import { createDb } from "../db";
+import { tasks } from "../db/schema";
 
 export class TaskDelete extends OpenAPIRoute {
 	schema = {
@@ -29,23 +32,29 @@ export class TaskDelete extends OpenAPIRoute {
 	};
 
 	async handle(c: AppContext) {
-		// Get validated data
 		const data = await this.getValidatedData<typeof this.schema>();
 
-		// Retrieve the validated slug
 		const { taskSlug } = data.params;
 
-		// Implement your own object deletion here
+		const db = createDb(c.env.DB);
 
-		// Return the deleted task for confirmation
+		const [deleted] = await db
+			.delete(tasks)
+			.where(eq(tasks.slug, taskSlug))
+			.returning();
+
+		if (!deleted) {
+			throw new NotFoundException();
+		}
+
 		return {
 			result: {
 				task: {
-					name: "Build something awesome with Cloudflare Workers",
-					slug: taskSlug,
-					description: "Lorem Ipsum",
-					completed: true,
-					due_date: "2022-12-24",
+					name: deleted.name,
+					slug: deleted.slug,
+					description: deleted.description ?? undefined,
+					completed: deleted.completed,
+					due_date: deleted.dueDate,
 				},
 			},
 			success: true,

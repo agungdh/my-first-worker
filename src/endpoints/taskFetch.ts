@@ -1,6 +1,9 @@
 import { NotFoundException, OpenAPIRoute } from "chanfana";
 import { z } from "zod";
+import { eq } from "drizzle-orm";
 import { type AppContext, Task } from "../types";
+import { createDb } from "../db";
+import { tasks } from "../db/schema";
 
 export class TaskFetch extends OpenAPIRoute {
 	schema = {
@@ -27,28 +30,30 @@ export class TaskFetch extends OpenAPIRoute {
 	};
 
 	async handle(c: AppContext) {
-		// Get validated data
 		const data = await this.getValidatedData<typeof this.schema>();
 
-		// Retrieve the validated slug
 		const { taskSlug } = data.params;
 
-		// Implement your own object fetch here
+		const db = createDb(c.env.DB);
 
-		const exists = true;
+		const row = await db
+			.select()
+			.from(tasks)
+			.where(eq(tasks.slug, taskSlug))
+			.get();
 
-		if (!exists) {
+		if (!row) {
 			throw new NotFoundException();
 		}
 
 		return {
 			success: true,
 			task: {
-				name: "my task",
-				slug: taskSlug,
-				description: "this needs to be done",
-				completed: false,
-				due_date: new Date().toISOString().slice(0, 10),
+				name: row.name,
+				slug: row.slug,
+				description: row.description ?? undefined,
+				completed: row.completed,
+				due_date: row.dueDate,
 			},
 		};
 	}
