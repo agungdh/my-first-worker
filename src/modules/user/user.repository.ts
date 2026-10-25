@@ -21,7 +21,12 @@ export class UserRepository extends BaseRepository<typeof users> {
 
 	async findByUsername(username: string): Promise<UserRecord | null> {
 		const row = await this.db
-			.select()
+			.select({
+				id: users.id,
+				username: users.username,
+				name: users.name,
+				passwordHash: users.passwordHash,
+			})
 			.from(users)
 			.where(this.liveWhere(eq(sql`lower(${users.username})`, username.toLowerCase())))
 			.get();
@@ -39,14 +44,18 @@ export class UserRepository extends BaseRepository<typeof users> {
 				passwordHash: input.passwordHash,
 				...auditCreate(),
 			})
-			.returning();
+			.returning({
+				id: users.id,
+				username: users.username,
+				name: users.name,
+			});
 
 		if (!created) throw new Error("Failed to create user");
 
 		return this.toUser(created);
 	}
 
-	private toUser(row: typeof users.$inferSelect): User {
+	private toUser(row: Pick<typeof users.$inferSelect, "id" | "username" | "name">): User {
 		return {
 			id: row.id,
 			username: row.username,
@@ -54,7 +63,7 @@ export class UserRepository extends BaseRepository<typeof users> {
 		};
 	}
 
-	private toRecord(row: typeof users.$inferSelect): UserRecord {
+	private toRecord(row: Pick<typeof users.$inferSelect, "id" | "username" | "name" | "passwordHash">): UserRecord {
 		return {
 			...this.toUser(row),
 			passwordHash: row.passwordHash,

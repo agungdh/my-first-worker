@@ -16,7 +16,13 @@ export class TaskRepository extends BaseRepository<typeof tasks> {
 			conditions.push(eq(tasks.completed, isCompleted));
 		}
 		const rows = await this.db
-			.select()
+			.select({
+				name: tasks.name,
+				slug: tasks.slug,
+				description: tasks.description,
+				completed: tasks.completed,
+				dueDate: tasks.dueDate,
+			})
 			.from(tasks)
 			.where(this.liveWhere(...conditions))
 			.limit(pageSize)
@@ -27,7 +33,13 @@ export class TaskRepository extends BaseRepository<typeof tasks> {
 
 	async getBySlug(slug: string): Promise<Task | null> {
 		const row = await this.db
-			.select()
+			.select({
+				name: tasks.name,
+				slug: tasks.slug,
+				description: tasks.description,
+				completed: tasks.completed,
+				dueDate: tasks.dueDate,
+			})
 			.from(tasks)
 			.where(this.liveSlugWhere(slug))
 			.get();
@@ -46,7 +58,13 @@ export class TaskRepository extends BaseRepository<typeof tasks> {
 				dueDate: input.due_date,
 				...auditCreate(),
 			})
-			.returning();
+			.returning({
+				name: tasks.name,
+				slug: tasks.slug,
+				description: tasks.description,
+				completed: tasks.completed,
+				dueDate: tasks.dueDate,
+			});
 
 		if (!created) throw new Error("Failed to create task");
 
@@ -65,7 +83,13 @@ export class TaskRepository extends BaseRepository<typeof tasks> {
 				...auditUpdate(),
 			})
 			.where(this.liveSlugWhere(slug))
-			.returning();
+			.returning({
+				name: tasks.name,
+				slug: tasks.slug,
+				description: tasks.description,
+				completed: tasks.completed,
+				dueDate: tasks.dueDate,
+			});
 
 		if (!updated) return null;
 
@@ -77,7 +101,7 @@ export class TaskRepository extends BaseRepository<typeof tasks> {
 			.update(tasks)
 			.set(auditDelete())
 			.where(this.liveSlugWhere(slug))
-			.returning();
+			.returning({ id: tasks.id });
 		return !!deleted;
 	}
 
@@ -85,7 +109,7 @@ export class TaskRepository extends BaseRepository<typeof tasks> {
 		return this.liveWhere(eq(sql`lower(${tasks.slug})`, slug.toLowerCase()));
 	}
 
-	private toTask(row: typeof tasks.$inferSelect): Task {
+	private toTask(row: Pick<typeof tasks.$inferSelect, "name" | "slug" | "description" | "completed" | "dueDate">): Task {
 		return {
 			name: row.name,
 			slug: row.slug,

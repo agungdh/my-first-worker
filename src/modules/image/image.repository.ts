@@ -17,7 +17,13 @@ export class ImageRepository extends BaseRepository<typeof images> {
 	async list(page: number): Promise<Image[]> {
 		const pageSize = 20;
 		const rows = await this.db
-			.select()
+			.select({
+				id: images.id,
+				key: images.key,
+				filename: images.filename,
+				contentType: images.contentType,
+				size: images.size,
+			})
 			.from(images)
 			.where(this.liveWhere())
 			.orderBy(desc(images.id))
@@ -30,7 +36,13 @@ export class ImageRepository extends BaseRepository<typeof images> {
 
 	async findById(id: number): Promise<Image | null> {
 		const row = await this.db
-			.select()
+			.select({
+				id: images.id,
+				key: images.key,
+				filename: images.filename,
+				contentType: images.contentType,
+				size: images.size,
+			})
 			.from(images)
 			.where(this.liveWhere(eq(images.id, id)))
 			.get();
@@ -41,7 +53,13 @@ export class ImageRepository extends BaseRepository<typeof images> {
 
 	async findByKey(key: string): Promise<Image | null> {
 		const row = await this.db
-			.select()
+			.select({
+				id: images.id,
+				key: images.key,
+				filename: images.filename,
+				contentType: images.contentType,
+				size: images.size,
+			})
 			.from(images)
 			.where(this.liveWhere(eq(sql`lower(${images.key})`, key.toLowerCase())))
 			.get();
@@ -60,7 +78,13 @@ export class ImageRepository extends BaseRepository<typeof images> {
 				size: input.size,
 				...auditCreate(),
 			})
-			.returning();
+			.returning({
+				id: images.id,
+				key: images.key,
+				filename: images.filename,
+				contentType: images.contentType,
+				size: images.size,
+			});
 
 		if (!created) throw new Error("Failed to create image");
 
@@ -78,7 +102,13 @@ export class ImageRepository extends BaseRepository<typeof images> {
 				...auditUpdate(),
 			})
 			.where(this.liveWhere(eq(images.id, id)))
-			.returning();
+			.returning({
+				id: images.id,
+				key: images.key,
+				filename: images.filename,
+				contentType: images.contentType,
+				size: images.size,
+			});
 
 		if (!updated) return null;
 
@@ -90,12 +120,12 @@ export class ImageRepository extends BaseRepository<typeof images> {
 			.update(images)
 			.set(auditDelete())
 			.where(this.liveWhere(eq(images.id, id)))
-			.returning();
+			.returning({ id: images.id });
 
 		return !!deleted;
 	}
 
-	private toImage(row: typeof images.$inferSelect): Image {
+	private toImage(row: Pick<typeof images.$inferSelect, "id" | "key" | "filename" | "contentType" | "size">): Image {
 		return {
 			id: row.id,
 			key: row.key,
