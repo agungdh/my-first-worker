@@ -1,4 +1,5 @@
 import { eq, sql } from "drizzle-orm";
+import { PAGE_SIZE } from "../../shared/config";
 import { BaseRepository } from "../../db/baseRepository";
 import { tasks } from "../../db/schema";
 import { auditCreate, auditDelete, auditUpdate } from "../../db/audit";
@@ -10,7 +11,7 @@ export class TaskRepository extends BaseRepository<typeof tasks> {
 	}
 
 	async list(page: number, isCompleted?: boolean): Promise<Task[]> {
-		const pageSize = 20;
+		const pageSize = PAGE_SIZE;
 		const conditions = [];
 		if (isCompleted !== undefined) {
 			conditions.push(eq(tasks.completed, isCompleted));

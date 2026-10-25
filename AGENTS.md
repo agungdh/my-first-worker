@@ -123,6 +123,7 @@ Rules:
 
 - Create and update endpoints return `{ success: true }` only; they do not echo the created/updated entity. The identity needed for auth (e.g. user for JWT signing) may be kept internally but must not be exposed in the response.
 - Delete endpoints may return the removed entity when useful.
+- List endpoints paginate via a `page` query param (0-based). Page size is defined once in `src/shared/config.ts` (`PAGE_SIZE`, default 20) — change it there, not per repository.
 
 ## Local Explorer (Debugging & Inspection)
 When running `npx wrangler dev`, a Local Explorer API is available for inspecting and debugging local Workers, bindings, and storage state. The API base URL is printed in the terminal when the dev server starts.

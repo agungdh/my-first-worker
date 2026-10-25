@@ -1,4 +1,5 @@
 import { desc, eq, sql } from "drizzle-orm";
+import { PAGE_SIZE } from "../../shared/config";
 import { BaseRepository } from "../../db/baseRepository";
 import { images } from "../../db/schema";
 import { auditCreate, auditDelete, auditUpdate } from "../../db/audit";
@@ -15,7 +16,7 @@ export class ImageRepository extends BaseRepository<typeof images> {
 	}
 
 	async list(page: number): Promise<Image[]> {
-		const pageSize = 20;
+		const pageSize = PAGE_SIZE;
 		const rows = await this.db
 			.select({
 				id: images.id,
