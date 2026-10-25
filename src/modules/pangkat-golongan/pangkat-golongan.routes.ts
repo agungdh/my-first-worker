@@ -42,7 +42,6 @@ class PangkatGolonganList extends OpenAPIRoute {
 		return success({
 			pangkat_golongan: page.items,
 			next_cursor: page.nextCursor,
-			next_cursor_value: page.nextCursorValue,
 			has_more: page.hasMore,
 		});
 	}

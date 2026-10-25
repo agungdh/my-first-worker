@@ -42,7 +42,6 @@ class BidangList extends OpenAPIRoute {
 		return success({
 			bidang: page.items,
 			next_cursor: page.nextCursor,
-			next_cursor_value: page.nextCursorValue,
 			has_more: page.hasMore,
 		});
 	}

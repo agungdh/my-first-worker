@@ -110,15 +110,7 @@ export class PegawaiRepository extends BaseRepository<typeof users> {
 			.orderBy(...orderBy)
 			.limit(PAGE_SIZE + 1);
 
-		return buildPage(
-			rows.map(toPegawai),
-			(pegawai) => pegawai.id,
-			(pegawai) => {
-				if (filter.sort === "nama") return pegawai.nama;
-				if (filter.sort === "nip") return pegawai.nip;
-				return null;
-			},
-		);
+		return buildPage(rows.map(toPegawai), (pegawai) => pegawai.id);
 	}
 
 	async findById(id: number): Promise<Pegawai | null> {

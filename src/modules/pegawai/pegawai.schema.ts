@@ -104,6 +104,5 @@ export const PegawaiListSchema = z.object({
 	success: z.boolean(),
 	pegawai: PegawaiSchema.array(),
 	next_cursor: z.number().nullable(),
-	next_cursor_value: z.string().nullable(),
 	has_more: z.boolean(),
 });

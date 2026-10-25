@@ -9,7 +9,6 @@ export type SortOrder = "asc" | "desc";
 export interface Page<T> {
 	items: T[];
 	nextCursor: number | null;
-	nextCursorValue: string | null;
 	hasMore: boolean;
 }
 
@@ -21,11 +20,7 @@ export const SortOrderSchema = z.enum(["asc", "desc"]).default("desc");
  * Cursor pagination always fetches one extra row to know whether another
  * page exists without running a count query.
  */
-export function buildPage<T>(
-	rows: T[],
-	getId: (row: T) => number,
-	getSortValue: (row: T) => string | null,
-): Page<T> {
+export function buildPage<T>(rows: T[], getId: (row: T) => number): Page<T> {
 	const hasMore = rows.length > PAGE_SIZE;
 	const items = hasMore ? rows.slice(0, PAGE_SIZE) : rows;
 	const last = items.at(-1);
@@ -34,7 +29,6 @@ export function buildPage<T>(
 		items,
 		hasMore,
 		nextCursor: hasMore && last ? getId(last) : null,
-		nextCursorValue: hasMore && last ? getSortValue(last) : null,
 	};
 }
 

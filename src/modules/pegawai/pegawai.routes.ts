@@ -113,7 +113,6 @@ class PegawaiList extends OpenAPIRoute {
 		return success({
 			pegawai: page.items.map(toPegawaiResponse),
 			next_cursor: page.nextCursor,
-			next_cursor_value: page.nextCursorValue,
 			has_more: page.hasMore,
 		});
 	}

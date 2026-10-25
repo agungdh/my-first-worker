@@ -23,6 +23,5 @@ export const BidangListSchema = z.object({
 	success: z.boolean(),
 	bidang: BidangSchema.array(),
 	next_cursor: z.number().nullable(),
-	next_cursor_value: z.string().nullable(),
 	has_more: z.boolean(),
 });

@@ -38,11 +38,7 @@ export class BidangRepository extends BaseRepository<typeof bidangs> {
 			.orderBy(...orderBy)
 			.limit(PAGE_SIZE + 1);
 
-		return buildPage(
-			rows,
-			(row) => row.id,
-			(row) => (filter.sort === "bidang" ? row.bidang : null),
-		);
+		return buildPage(rows, (row) => row.id);
 	}
 
 	async findById(id: number): Promise<Bidang | null> {

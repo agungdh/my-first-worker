@@ -65,20 +65,7 @@ export class PangkatGolonganRepository extends BaseRepository<typeof pangkatGolo
 			.orderBy(...orderBy)
 			.limit(PAGE_SIZE + 1);
 
-		return buildPage(rows, (row) => row.id, (row) => {
-			switch (filter.sort) {
-				case "id":
-					return null;
-				case "jenjang":
-					return row.jenjang;
-				case "pangkat":
-					return row.pangkat;
-				case "golongan":
-					return row.golongan;
-				case "ruang":
-					return row.ruang;
-			}
-		});
+		return buildPage(rows, (row) => row.id);
 	}
 
 	async findById(id: number): Promise<PangkatGolongan | null> {

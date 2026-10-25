@@ -32,6 +32,5 @@ export const PangkatGolonganListSchema = z.object({
 	success: z.boolean(),
 	pangkat_golongan: PangkatGolonganSchema.array(),
 	next_cursor: z.number().nullable(),
-	next_cursor_value: z.string().nullable(),
 	has_more: z.boolean(),
 });
