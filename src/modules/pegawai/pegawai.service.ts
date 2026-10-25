@@ -38,12 +38,20 @@ export class PegawaiService {
 		return pegawai;
 	}
 
-	async login(input: LoginInput): Promise<PegawaiAuth> {
+	async login(input: LoginInput): Promise<Pegawai> {
 		const record = await this.repo.findAuthByNip(input.nip);
 		if (!record || !(await verifyPassword(input.password, record.passwordHash))) {
 			throw new UnauthorizedException();
 		}
 		if (record.status !== "aktif") throw new UnauthorizedException("Account is not active");
+
+		return this.get(record.id);
+	}
+
+	/** Resolves the JWT `sub` claim into a live, active principal. */
+	async principal(id: number): Promise<PegawaiAuth | null> {
+		const record = await this.repo.findAuthById(id);
+		if (!record || record.status !== "aktif") return null;
 
 		return { id: record.id, nip: record.nip, nama: record.nama, role: record.role };
 	}

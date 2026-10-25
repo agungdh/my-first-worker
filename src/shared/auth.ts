@@ -2,7 +2,6 @@ import { deleteCookie, getCookie, setCookie } from "hono/cookie";
 import type { MiddlewareHandler } from "hono";
 import { sign, verify } from "hono/jwt";
 import type { AppContext, AppEnv } from "./types";
-import type { PegawaiAuth } from "../modules/pegawai/pegawai.domain";
 import type { Role } from "../modules/pegawai/pegawai.constants";
 
 export const AUTH_COOKIE = "access_token";
@@ -16,15 +15,16 @@ const cookieOptions = {
 	maxAge: AUTH_TOKEN_TTL_SECONDS,
 } as const;
 
-export async function signAuthToken(secret: string, user: PegawaiAuth): Promise<string> {
+/**
+ * The token only carries the pegawai id. Everything else is resolved from the
+ * database on each request, so a stale or forged claim can never grant a role.
+ */
+export async function signAuthToken(secret: string, userId: number): Promise<string> {
 	const now = Math.floor(Date.now() / 1000);
 
 	return sign(
 		{
-			sub: user.id,
-			nip: user.nip,
-			nama: user.nama,
-			role: user.role,
+			sub: userId,
 			iat: now,
 			exp: now + AUTH_TOKEN_TTL_SECONDS,
 		},
@@ -32,15 +32,11 @@ export async function signAuthToken(secret: string, user: PegawaiAuth): Promise<
 	);
 }
 
-export async function verifyAuthToken(secret: string, token: string): Promise<PegawaiAuth | null> {
+export async function verifyAuthToken(secret: string, token: string): Promise<number | null> {
 	try {
 		const payload = await verify(token, secret, "HS256");
-		return {
-			id: payload.sub as number,
-			nip: payload.nip as string,
-			nama: payload.nama as string,
-			role: payload.role as Role,
-		};
+
+		return typeof payload.sub === "number" ? payload.sub : null;
 	} catch {
 		return null;
 	}
@@ -71,8 +67,12 @@ export const requireAuth: MiddlewareHandler<AppEnv> = async (c, next) => {
 	if (publicRoutes.has(`${c.req.method} ${c.req.path}`)) return next();
 
 	const token = getAuthToken(c);
+	const userId = token ? await verifyAuthToken(c.env.JWT_SECRET, token) : null;
+	if (userId === null) return unauthorized(c);
 
-	const user = token ? await verifyAuthToken(c.env.JWT_SECRET, token) : null;
+	// The principal is always read from the database: deleted or deactivated
+	// pegawai lose access immediately, without waiting for the token to expire.
+	const user = await c.get("services").pegawai.principal(userId);
 	if (!user) return unauthorized(c);
 
 	c.set("user", user);
@@ -80,8 +80,8 @@ export const requireAuth: MiddlewareHandler<AppEnv> = async (c, next) => {
 };
 
 /**
- * Role guard for authenticated routes. Reads the role from the token claims,
- * so it never hits the database.
+ * Role guard for authenticated routes. `requireAuth` already resolved the
+ * principal from the database, so this only reads `c.get("user")`.
  */
 export function requireRole(...roles: Role[]): MiddlewareHandler<AppEnv> {
 	return async (c, next) => {

@@ -107,10 +107,3 @@ export const PegawaiListSchema = z.object({
 	next_cursor_value: z.string().nullable(),
 	has_more: z.boolean(),
 });
-
-export const PegawaiAuthSchema = z.object({
-	id: z.number(),
-	nip: z.string(),
-	nama: z.string(),
-	role: z.enum(PEGAWAI_ROLES),
-});

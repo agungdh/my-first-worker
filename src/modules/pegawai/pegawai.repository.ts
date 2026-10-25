@@ -53,6 +53,9 @@ export interface AuthRecord {
 	passwordHash: string;
 }
 
+/** Minimal identity loaded per request from the JWT `sub` claim. */
+export type PrincipalRecord = Omit<AuthRecord, "passwordHash">;
+
 export class PegawaiRepository extends BaseRepository<typeof users> {
 	constructor(d1: D1Database) {
 		super(d1, users);
@@ -128,6 +131,28 @@ export class PegawaiRepository extends BaseRepository<typeof users> {
 			.get();
 
 		return row ? toPegawai(row) : null;
+	}
+
+	async findAuthById(id: number): Promise<PrincipalRecord | null> {
+		const row = await this.db
+			.select({
+				id: users.id,
+				nip: users.nip,
+				nama: users.nama,
+				role: users.role,
+				status: users.status,
+			})
+			.from(users)
+			.where(this.liveWhere(eq(users.id, id)))
+			.get();
+
+		if (!row) return null;
+
+		return {
+			...row,
+			role: row.role as Role,
+			status: row.status as Status,
+		};
 	}
 
 	async findAuthByNip(nip: string): Promise<AuthRecord | null> {

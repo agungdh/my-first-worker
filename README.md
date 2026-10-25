@@ -47,4 +47,6 @@ Search uses an FTS5 trigram index (`pegawai_fts`) and requires at least 3 charac
 
 List endpoints use cursor pagination. Send `sort` (default `id`), `order` (default `desc`), and on the next request `cursor` plus `cursor_value` when sorting by a non-`id` column. Responses return `next_cursor`, `next_cursor_value`, and `has_more`. Page size is fixed by `PAGE_SIZE` in `src/shared/config.ts`.
 
+Login returns the full pegawai record (including `bidang` and `pangkat_golongan`) so the SPA can cache it; the JWT cookie only carries the pegawai id (`sub`), and `requireAuth` reloads the principal from D1 on every authenticated request.
+
 See `AGENTS.md` for the full conventions (audit columns, soft delete, transactions, search, auth, API shape).

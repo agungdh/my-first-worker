@@ -5,7 +5,6 @@ import { success, SuccessSchema } from "../../shared/http";
 import { setAuthCookie, clearAuthCookie, signAuthToken } from "../../shared/auth";
 import {
 	LoginSchema,
-	PegawaiAuthSchema,
 	PegawaiCreateSchema,
 	PegawaiListQuerySchema,
 	PegawaiListSchema,
@@ -32,7 +31,7 @@ class PegawaiLogin extends OpenAPIRoute {
 				description: "Returns the authenticated pegawai and sets the auth cookie",
 				content: {
 					"application/json": {
-						schema: z.object({ success: z.boolean(), user: PegawaiAuthSchema }),
+						schema: z.object({ success: z.boolean(), user: PegawaiSchema }),
 					},
 				},
 			},
@@ -44,10 +43,10 @@ class PegawaiLogin extends OpenAPIRoute {
 
 		const user = await c.get("services").pegawai.login(data.body);
 
-		const token = await signAuthToken(c.env.JWT_SECRET, user);
+		const token = await signAuthToken(c.env.JWT_SECRET, user.id);
 		setAuthCookie(c, token);
 
-		return c.json(success({ user }));
+		return c.json(success({ user: toPegawaiResponse(user) }));
 	}
 }
 
