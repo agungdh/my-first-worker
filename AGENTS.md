@@ -26,7 +26,7 @@ Schema lives in `src/db/schema.ts`, migrations in `drizzle/`.
 | Command | Purpose |
 |---------|---------|
 | `npx drizzle-kit generate` | Generate a migration after schema changes |
-| `npx wrangler d1 migrations apply my-first-worker-db --local` | Apply migrations locally |
+| `npm run migrate` | Apply migrations locally (`wrangler d1 migrations apply my-first-worker-db --local`) |
 | `npx wrangler d1 migrations apply my-first-worker-db --remote` | Apply migrations remotely |
 
 Migrations are applied manually, not as part of `wrangler deploy`.

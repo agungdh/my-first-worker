@@ -6,6 +6,7 @@
     "deploy": "wrangler deploy",
     "dev": "wrangler dev",
     "start": "wrangler dev",
+    "migrate": "wrangler d1 migrations apply my-first-worker-db --local",
     "cf-typegen": "wrangler types"
   },
   "dependencies": {
