@@ -17,8 +17,8 @@ For all limits and quotas, retrieve from the product's `/platform/limits/` page.
 | `npx wrangler deploy` | Deploy to Cloudflare |
 | `npx wrangler types` | Generate TypeScript types |
 | `npm run migrate` | Apply D1 migrations locally |
-| `npm run seed` | Seed master data + first admin locally |
-| `npm run seed:remote` | Seed master data + first admin remotely |
+| `npm run seed` | Seed master data, first admin, and 100 demo pegawai locally |
+| `npm run seed:remote` | Seed master data, first admin, and 100 demo pegawai remotely |
 
 Run `wrangler types` after changing bindings in wrangler.jsonc.
 
@@ -121,6 +121,7 @@ Pegawai are the users: credentials and profile live on the `users` table (`nip`,
 Rules:
 
 - There is NO public register endpoint. Pegawai are created by an admin through `POST /api/pegawai`, and the first admin is inserted by `npm run seed`.
+- `npm run seed` also inserts 100 demo pegawai (role `pegawai`, password = their NIP, 90 aktif / 10 non_aktif, round-robin across bidang and pangkat golongan) so lists, filters, and pagination have data. It is idempotent by NIP. Tune with `SEED_PEGAWAI_COUNT` (default 100, `0` to skip) and `SEED_PEGAWAI_PASSWORD` (one shared password instead of per-NIP).
 - Passwords are hashed with PBKDF2-SHA256 (100k iterations, random salt) via `src/modules/pegawai/pegawai.password.ts`. The stored format is `pbkdf2_sha256$<iterations>$<salt>$<hash>` so the iteration count can be raised later.
 - `password_hash` is internal only. It never appears in domain types, Zod/OpenAPI schemas, or API responses.
 - On create, an empty or omitted `password` defaults to the NIP. On update, an empty or omitted `password` keeps the current one.
