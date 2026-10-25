@@ -29,10 +29,12 @@ class UserRegister extends OpenAPIRoute {
 		},
 		responses: {
 			"201": {
-				description: "Returns the created user and sets the auth cookie",
+				description: "User registered and auth cookie set",
 				content: {
 					"application/json": {
-						schema: UserResponseSchema,
+						schema: z.object({
+							success: z.boolean(),
+						}),
 					},
 				},
 			},
@@ -47,7 +49,7 @@ class UserRegister extends OpenAPIRoute {
 		const token = await signAuthToken(c.env.JWT_SECRET, user);
 		setAuthCookie(c, token);
 
-		return c.json(success({ user }), 201);
+		return c.json(success({}), 201);
 	}
 }
 

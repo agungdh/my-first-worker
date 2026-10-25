@@ -15,6 +15,10 @@ const ImageResponseSchema = z.object({
 	image: ImageSchema,
 });
 
+const SuccessSchema = z.object({
+	success: z.boolean(),
+});
+
 const ImageParamsSchema = z.object({
 	imageId: z.coerce.number().int().positive().describe("Image id"),
 });
@@ -71,10 +75,10 @@ class ImageCreate extends OpenAPIRoute {
 		},
 		responses: {
 			"201": {
-				description: "Returns the created image",
+				description: "Image created",
 				content: {
 					"application/json": {
-						schema: ImageResponseSchema,
+						schema: SuccessSchema,
 					},
 				},
 			},
@@ -84,9 +88,9 @@ class ImageCreate extends OpenAPIRoute {
 	async handle(c: AppContext) {
 		const data = await this.getValidatedData<typeof this.schema>();
 
-		const image = await c.get("services").images.create(data.body);
+		await c.get("services").images.create(data.body);
 
-		return c.json(success({ image }), 201);
+		return c.json(success({}), 201);
 	}
 }
 
@@ -167,10 +171,10 @@ class ImageUpdate extends OpenAPIRoute {
 		},
 		responses: {
 			"200": {
-				description: "Returns the updated image",
+				description: "Image updated",
 				content: {
 					"application/json": {
-						schema: ImageResponseSchema,
+						schema: SuccessSchema,
 					},
 				},
 			},
@@ -180,9 +184,9 @@ class ImageUpdate extends OpenAPIRoute {
 	async handle(c: AppContext) {
 		const data = await this.getValidatedData<typeof this.schema>();
 
-		const image = await c.get("services").images.update(data.params.imageId, data.body);
+		await c.get("services").images.update(data.params.imageId, data.body);
 
-		return success({ image });
+		return success({});
 	}
 }
 

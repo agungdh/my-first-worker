@@ -68,8 +68,8 @@ export class ImageRepository extends BaseRepository<typeof images> {
 		return this.toImage(row);
 	}
 
-	async create(input: ImageRecordInput): Promise<Image> {
-		const [created] = await this.db
+	async create(input: ImageRecordInput): Promise<void> {
+		await this.db
 			.insert(images)
 			.values({
 				key: input.key,
@@ -78,20 +78,10 @@ export class ImageRepository extends BaseRepository<typeof images> {
 				size: input.size,
 				...auditCreate(),
 			})
-			.returning({
-				id: images.id,
-				key: images.key,
-				filename: images.filename,
-				contentType: images.contentType,
-				size: images.size,
-			});
-
-		if (!created) throw new Error("Failed to create image");
-
-		return this.toImage(created);
+			.run();
 	}
 
-	async update(id: number, input: ImageRecordInput): Promise<Image | null> {
+	async update(id: number, input: ImageRecordInput): Promise<boolean> {
 		const [updated] = await this.db
 			.update(images)
 			.set({
@@ -102,17 +92,9 @@ export class ImageRepository extends BaseRepository<typeof images> {
 				...auditUpdate(),
 			})
 			.where(this.liveWhere(eq(images.id, id)))
-			.returning({
-				id: images.id,
-				key: images.key,
-				filename: images.filename,
-				contentType: images.contentType,
-				size: images.size,
-			});
+			.returning({ id: images.id });
 
-		if (!updated) return null;
-
-		return this.toImage(updated);
+		return !!updated;
 	}
 
 	async delete(id: number): Promise<boolean> {

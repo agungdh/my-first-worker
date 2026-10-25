@@ -15,18 +15,17 @@ export class TaskService {
 		return task;
 	}
 
-	async create(input: CreateTaskInput): Promise<Task> {
+	async create(input: CreateTaskInput): Promise<void> {
 		const existing = await this.repo.getBySlug(input.slug);
 		if (existing) throw new ConflictException();
-		return this.repo.create(input);
+		await this.repo.create(input);
 	}
 
-	async update(slug: string, input: UpdateTaskInput): Promise<Task> {
+	async update(slug: string, input: UpdateTaskInput): Promise<void> {
 		const existing = await this.repo.getBySlug(slug);
 		if (!existing) throw new NotFoundException();
 		const updated = await this.repo.update(slug, input);
 		if (!updated) throw new NotFoundException();
-		return updated;
 	}
 
 	async delete(slug: string): Promise<Task> {

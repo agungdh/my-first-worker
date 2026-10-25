@@ -67,6 +67,7 @@ Rules:
 - Deletes are soft: set `deleted_at` / `deleted_by` instead of removing rows. Repositories extend `BaseRepository` (`src/db/baseRepository.ts`) and every read (list, get, update target) MUST filter through `liveWhere(...)`, which adds `isNull(table.deletedAt)`.
 - Unique constraints MUST be partial unique indexes scoped to live rows and case-insensitive: `uniqueIndex("...").on(sql`lower(${table.column})`).where(sql`${table.deletedAt} IS NULL`)`. Never use `.unique()` on a column, otherwise a soft-deleted row keeps blocking reuse of that value.
 - Queries that filter by a unique text column (get, update, delete target) MUST compare with `lower(column)` too (e.g. `eq(sql`lower(${table.slug})`, value.toLowerCase())`). Otherwise a row stored with different casing won't match the uniqueness semantics of the index.
+- Queries must never use `SELECT *` (bare `.select()` / `.returning()`). Repositories project only the columns needed for the domain/DTO and exclude audit columns, which are internal and never exposed. Applies to both `select()` and `returning()`.
 
 ## Authentication
 
@@ -117,6 +118,11 @@ Rules:
 - All R2 access goes through the S3 API with those credentials (`aws4fetch`), including `HEAD` and `DELETE`. Do not use the R2 binding for image reads/deletes: presigned URLs always target the real bucket, so a local binding in `wrangler dev` would read a different bucket than the browser uploaded to.
 - Local dev therefore needs real R2 credentials; point `.dev.vars` at a separate bucket with `R2_BUCKET` if dev uploads should not share data with production.
 - Bucket CORS lives in `r2-cors.json` and is applied with `npm run r2:cors`. It must allow the SPA origins for `GET`/`PUT`/`HEAD` with the `Content-Type` header, otherwise browser uploads fail at preflight.
+
+## API conventions
+
+- Create and update endpoints return `{ success: true }` only; they do not echo the created/updated entity. The identity needed for auth (e.g. user for JWT signing) may be kept internally but must not be exposed in the response.
+- Delete endpoints may return the removed entity when useful.
 
 ## Local Explorer (Debugging & Inspection)
 When running `npx wrangler dev`, a Local Explorer API is available for inspecting and debugging local Workers, bindings, and storage state. The API base URL is printed in the terminal when the dev server starts.

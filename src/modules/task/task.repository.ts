@@ -47,8 +47,8 @@ export class TaskRepository extends BaseRepository<typeof tasks> {
 		return this.toTask(row);
 	}
 
-	async create(input: CreateTaskInput): Promise<Task> {
-		const [created] = await this.db
+	async create(input: CreateTaskInput): Promise<void> {
+		await this.db
 			.insert(tasks)
 			.values({
 				name: input.name,
@@ -58,20 +58,10 @@ export class TaskRepository extends BaseRepository<typeof tasks> {
 				dueDate: input.due_date,
 				...auditCreate(),
 			})
-			.returning({
-				name: tasks.name,
-				slug: tasks.slug,
-				description: tasks.description,
-				completed: tasks.completed,
-				dueDate: tasks.dueDate,
-			});
-
-		if (!created) throw new Error("Failed to create task");
-
-		return this.toTask(created);
+			.run();
 	}
 
-	async update(slug: string, input: UpdateTaskInput): Promise<Task | null> {
+	async update(slug: string, input: UpdateTaskInput): Promise<boolean> {
 		const [updated] = await this.db
 			.update(tasks)
 			.set({
@@ -83,17 +73,9 @@ export class TaskRepository extends BaseRepository<typeof tasks> {
 				...auditUpdate(),
 			})
 			.where(this.liveSlugWhere(slug))
-			.returning({
-				name: tasks.name,
-				slug: tasks.slug,
-				description: tasks.description,
-				completed: tasks.completed,
-				dueDate: tasks.dueDate,
-			});
+			.returning({ id: tasks.id });
 
-		if (!updated) return null;
-
-		return this.toTask(updated);
+		return !!updated;
 	}
 
 	async delete(slug: string): Promise<boolean> {

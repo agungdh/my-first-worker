@@ -46,17 +46,15 @@ export class ImageService {
 		return { ...image, url: await this.storage.createDownloadUrl(image.key, image.filename) };
 	}
 
-	async create(input: SaveImageInput): Promise<ImageWithUrl> {
+	async create(input: SaveImageInput): Promise<void> {
 		const existing = await this.repo.findByKey(input.key);
 		if (existing) throw new ConflictException();
 
 		const stored = await this.readStoredImage(input.key);
-		const image = await this.repo.create({ ...input, ...stored });
-
-		return { ...image, url: await this.storage.createDownloadUrl(image.key, image.filename) };
+		await this.repo.create({ ...input, ...stored });
 	}
 
-	async update(id: number, input: SaveImageInput): Promise<ImageWithUrl> {
+	async update(id: number, input: SaveImageInput): Promise<void> {
 		const existing = await this.repo.findById(id);
 		if (!existing) throw new NotFoundException();
 
@@ -69,12 +67,10 @@ export class ImageService {
 			stored = await this.readStoredImage(input.key);
 		}
 
-		const image = await this.repo.update(id, { ...input, ...stored });
-		if (!image) throw new NotFoundException();
+		const updated = await this.repo.update(id, { ...input, ...stored });
+		if (!updated) throw new NotFoundException();
 
 		if (replacing) await this.storage.remove(existing.key);
-
-		return { ...image, url: await this.storage.createDownloadUrl(image.key, image.filename) };
 	}
 
 	async delete(id: number): Promise<ImageWithUrl> {

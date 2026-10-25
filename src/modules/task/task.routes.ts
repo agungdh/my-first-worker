@@ -19,12 +19,11 @@ class TaskCreate extends OpenAPIRoute {
 		},
 		responses: {
 			"201": {
-				description: "Returns the created task",
+				description: "Task created",
 				content: {
 					"application/json": {
 						schema: z.object({
 							success: z.boolean(),
-							task: TaskSchema,
 						}),
 					},
 				},
@@ -38,7 +37,7 @@ class TaskCreate extends OpenAPIRoute {
 		const taskToCreate = data.body;
 
 		const service = c.get("services").tasks;
-		const task = await service.create({
+		await service.create({
 			name: taskToCreate.name,
 			slug: taskToCreate.slug,
 			description: taskToCreate.description,
@@ -46,7 +45,7 @@ class TaskCreate extends OpenAPIRoute {
 			due_date: taskToCreate.due_date,
 		});
 
-		return c.json(success({ task }), 201);
+		return c.json(success({}), 201);
 	}
 }
 
@@ -139,12 +138,11 @@ class TaskUpdate extends OpenAPIRoute {
 		},
 		responses: {
 			"200": {
-				description: "Returns the updated task",
+				description: "Task updated",
 				content: {
 					"application/json": {
 						schema: z.object({
 							success: z.boolean(),
-							task: TaskSchema,
 						}),
 					},
 				},
@@ -158,9 +156,9 @@ class TaskUpdate extends OpenAPIRoute {
 		const { taskSlug } = data.params;
 		const updates = data.body;
 
-		const task = await c.get("services").tasks.update(taskSlug, updates);
+		await c.get("services").tasks.update(taskSlug, updates);
 
-		return success({ task });
+		return success({});
 	}
 }
 
