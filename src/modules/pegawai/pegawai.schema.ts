@@ -53,8 +53,8 @@ export const PegawaiUpdateSchema = z.strictObject({
 
 export const PegawaiListQuerySchema = z.object({
 	cursor: CursorSchema.optional().describe("Id of the last item from the previous page"),
-	sort: z.enum(["id", "nama", "nip"]).default("id").describe("Sort column"),
-	order: SortOrderSchema.describe("Sort direction"),
+	sort: z.enum(["id", "nama", "nip"]).default("id").describe("Sort column (default id)"),
+	order: SortOrderSchema.describe("Sort direction (default desc)"),
 	search: z
 		.string()
 		.trim()

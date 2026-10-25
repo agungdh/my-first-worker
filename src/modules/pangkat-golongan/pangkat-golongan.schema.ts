@@ -13,8 +13,8 @@ export const PangkatGolonganListQuerySchema = z.object({
 	sort: z
 		.enum(["id", "jenjang", "pangkat", "golongan", "ruang"])
 		.default("id")
-		.describe("Sort column"),
-	order: SortOrderSchema.describe("Sort direction"),
+		.describe("Sort column (default id)"),
+	order: SortOrderSchema.describe("Sort direction (default desc)"),
 });
 
 export const PangkatGolonganSchema = z.object({
