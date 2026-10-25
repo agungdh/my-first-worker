@@ -1,4 +1,3 @@
-import { InputValidationException } from "chanfana";
 import { and, eq, gt, lt, or, type SQL } from "drizzle-orm";
 import type { SQLiteColumn } from "drizzle-orm/sqlite-core";
 import { z } from "zod";
@@ -13,7 +12,6 @@ export interface Page<T> {
 }
 
 export const CursorSchema = z.number().int().positive();
-export const CursorValueSchema = z.string().min(1).max(255);
 export const SortOrderSchema = z.enum(["asc", "desc"]).default("desc");
 
 /**
@@ -35,33 +33,22 @@ export function buildPage<T>(rows: T[], getId: (row: T) => number): Page<T> {
 /**
  * Keyset condition for `(sortColumn, id)` ordered by the same direction.
  * All sortable columns are NOT NULL, so no null ordering is involved.
+ * The sort value is resolved from the cursor row by the repository, so callers
+ * only ever send the cursor id.
  */
 export function keysetCondition(
 	sortColumn: SQLiteColumn | null,
-	cursorValue: string | null,
+	sortValue: string | null,
 	idColumn: SQLiteColumn,
 	cursorId: number,
 	order: SortOrder,
 ): SQL {
 	const compare = order === "asc" ? gt : lt;
 
-	if (!sortColumn) return compare(idColumn, cursorId)!;
-	if (cursorValue === null) {
-		throw new InputValidationException("cursor_value is required when sort is not id");
-	}
+	if (!sortColumn || sortValue === null) return compare(idColumn, cursorId)!;
 
 	return or(
-		compare(sortColumn, cursorValue),
-		and(eq(sortColumn, cursorValue), compare(idColumn, cursorId)),
+		compare(sortColumn, sortValue),
+		and(eq(sortColumn, sortValue), compare(idColumn, cursorId)),
 	)!;
-}
-
-export function assertCursorValue(
-	cursor: number | undefined,
-	cursorValue: string | undefined,
-	isIdSort: boolean,
-): void {
-	if (cursor !== undefined && !isIdSort && cursorValue === undefined) {
-		throw new InputValidationException("cursor_value is required when sort is not id");
-	}
 }

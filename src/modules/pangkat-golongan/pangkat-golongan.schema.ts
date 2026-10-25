@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { CursorSchema, CursorValueSchema, SortOrderSchema } from "../../shared/pagination";
+import { CursorSchema, SortOrderSchema } from "../../shared/pagination";
 
 export const PangkatGolonganInputSchema = z.strictObject({
 	jenjang: z.string().trim().min(1).max(100),
@@ -10,9 +10,6 @@ export const PangkatGolonganInputSchema = z.strictObject({
 
 export const PangkatGolonganListQuerySchema = z.object({
 	cursor: CursorSchema.optional().describe("Id of the last item from the previous page"),
-	cursor_value: CursorValueSchema.optional().describe(
-		"Sort value of the last item; required when sort is not id"
-	),
 	sort: z
 		.enum(["id", "jenjang", "pangkat", "golongan", "ruang"])
 		.default("id")

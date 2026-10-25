@@ -1,7 +1,6 @@
 import { z } from "zod";
 import {
 	CursorSchema,
-	CursorValueSchema,
 	SortOrderSchema,
 } from "../../shared/pagination";
 import {
@@ -54,9 +53,6 @@ export const PegawaiUpdateSchema = z.strictObject({
 
 export const PegawaiListQuerySchema = z.object({
 	cursor: CursorSchema.optional().describe("Id of the last item from the previous page"),
-	cursor_value: CursorValueSchema.optional().describe(
-		"Sort value of the last item; required when sort is not id",
-	),
 	sort: z.enum(["id", "nama", "nip"]).default("id").describe("Sort column"),
 	order: SortOrderSchema.describe("Sort direction"),
 	search: z

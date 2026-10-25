@@ -67,14 +67,21 @@ export class PegawaiRepository extends BaseRepository<typeof users> {
 			filter.sort === "nama" ? users.nama : filter.sort === "nip" ? users.nip : null;
 
 		if (filter.cursor !== undefined) {
+			let sortValue: string | null = null;
+
+			if (sortColumn) {
+				const cursorRow = await this.db
+					.select({ value: sortColumn })
+					.from(users)
+					.where(eq(users.id, filter.cursor))
+					.get();
+
+				if (!cursorRow) return { items: [], nextCursor: null, hasMore: false };
+				sortValue = cursorRow.value;
+			}
+
 			conditions.push(
-				keysetCondition(
-					sortColumn,
-					filter.cursorValue ?? null,
-					users.id,
-					filter.cursor,
-					filter.order,
-				),
+				keysetCondition(sortColumn, sortValue, users.id, filter.cursor, filter.order),
 			);
 		}
 

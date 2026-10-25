@@ -13,7 +13,6 @@ export type BidangSort = "id" | "bidang";
 
 export interface BidangFilter {
 	cursor?: number;
-	cursorValue?: string;
 	sort: BidangSort;
 	order: SortOrder;
 }

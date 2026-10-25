@@ -34,7 +34,6 @@ class PangkatGolonganList extends OpenAPIRoute {
 		const query = data.query;
 		const page = await c.get("services").pangkatGolongan.list({
 			cursor: query.cursor,
-			cursorValue: query.cursor_value,
 			sort: query.sort,
 			order: query.order,
 		});

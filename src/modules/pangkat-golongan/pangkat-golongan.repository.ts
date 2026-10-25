@@ -40,13 +40,26 @@ export class PangkatGolonganRepository extends BaseRepository<typeof pangkatGolo
 
 	async list(filter: PangkatGolonganFilter): Promise<Page<PangkatGolongan>> {
 		const sortColumn = filter.sort === "id" ? null : sortColumns[filter.sort];
+		let sortValue: string | null = null;
+
+		if (filter.cursor !== undefined && sortColumn) {
+			const cursorRow = await this.db
+				.select({ value: sortColumn })
+				.from(pangkatGolongans)
+				.where(eq(pangkatGolongans.id, filter.cursor))
+				.get();
+
+			if (!cursorRow) return { items: [], nextCursor: null, hasMore: false };
+			sortValue = cursorRow.value;
+		}
+
 		const conditions =
 			filter.cursor === undefined
 				? []
 				: [
 						keysetCondition(
 							sortColumn,
-							filter.cursorValue ?? null,
+							sortValue,
 							pangkatGolongans.id,
 							filter.cursor,
 							filter.order,

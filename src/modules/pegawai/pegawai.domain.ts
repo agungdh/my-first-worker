@@ -70,7 +70,6 @@ export type PegawaiSort = "id" | "nama" | "nip";
 
 export interface PegawaiFilter {
 	cursor?: number;
-	cursorValue?: string;
 	sort: PegawaiSort;
 	order: SortOrder;
 	search?: string;

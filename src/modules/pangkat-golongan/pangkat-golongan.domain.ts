@@ -19,7 +19,6 @@ export type PangkatGolonganSort = "id" | "jenjang" | "pangkat" | "golongan" | "r
 
 export interface PangkatGolonganFilter {
 	cursor?: number;
-	cursorValue?: string;
 	sort: PangkatGolonganSort;
 	order: SortOrder;
 }

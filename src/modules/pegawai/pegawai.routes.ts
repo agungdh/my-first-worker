@@ -98,7 +98,6 @@ class PegawaiList extends OpenAPIRoute {
 
 		const page = await c.get("services").pegawai.list({
 			cursor: query.cursor,
-			cursorValue: query.cursor_value,
 			sort: query.sort,
 			order: query.order,
 			search: query.search,
