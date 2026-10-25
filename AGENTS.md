@@ -19,6 +19,8 @@ For all limits and quotas, retrieve from the product's `/platform/limits/` page.
 | `npm run migrate` | Apply D1 migrations locally |
 | `npm run seed` | Seed master data, first admin, and 100 demo pegawai locally |
 | `npm run seed:remote` | Seed master data, first admin, and 100 demo pegawai remotely |
+| `npm run seed:reset` | Delete demo pegawai, then re-seed locally |
+| `npm run seed:reset:remote` | Delete demo pegawai, then re-seed remotely |
 
 Run `wrangler types` after changing bindings in wrangler.jsonc.
 
