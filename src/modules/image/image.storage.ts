@@ -54,9 +54,15 @@ export class ImageStorage {
 		return signed.url.toString();
 	}
 
-	async createDownloadUrl(key: string): Promise<string> {
+	async createDownloadUrl(key: string, filename?: string): Promise<string> {
 		const url = new URL(this.objectUrl(key));
 		url.searchParams.set("X-Amz-Expires", String(DOWNLOAD_URL_TTL_SECONDS));
+		if (filename) {
+			url.searchParams.set(
+				"response-content-disposition",
+				`inline; filename="${filename.replace(/"/g, "")}"`,
+			);
+		}
 
 		const signed = await this.signer().sign(url.toString(), {
 			method: "GET",

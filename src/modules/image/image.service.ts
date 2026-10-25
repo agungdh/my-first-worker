@@ -34,7 +34,7 @@ export class ImageService {
 		return Promise.all(
 			images.map(async (image) => ({
 				...image,
-				url: await this.storage.createDownloadUrl(image.key),
+				url: await this.storage.createDownloadUrl(image.key, image.filename),
 			})),
 		);
 	}
@@ -43,7 +43,7 @@ export class ImageService {
 		const image = await this.repo.findById(id);
 		if (!image) throw new NotFoundException();
 
-		return { ...image, url: await this.storage.createDownloadUrl(image.key) };
+		return { ...image, url: await this.storage.createDownloadUrl(image.key, image.filename) };
 	}
 
 	async create(input: SaveImageInput): Promise<ImageWithUrl> {
@@ -53,7 +53,7 @@ export class ImageService {
 		const stored = await this.readStoredImage(input.key);
 		const image = await this.repo.create({ ...input, ...stored });
 
-		return { ...image, url: await this.storage.createDownloadUrl(image.key) };
+		return { ...image, url: await this.storage.createDownloadUrl(image.key, image.filename) };
 	}
 
 	async update(id: number, input: SaveImageInput): Promise<ImageWithUrl> {
@@ -74,7 +74,7 @@ export class ImageService {
 
 		if (replacing) await this.storage.remove(existing.key);
 
-		return { ...image, url: await this.storage.createDownloadUrl(image.key) };
+		return { ...image, url: await this.storage.createDownloadUrl(image.key, image.filename) };
 	}
 
 	async delete(id: number): Promise<ImageWithUrl> {
