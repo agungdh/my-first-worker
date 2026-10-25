@@ -45,4 +45,6 @@ Timestamps: audit columns (`created_at`, `updated_at`, `deleted_at`) use epoch m
 
 Search uses an FTS5 trigram index (`pegawai_fts`) and requires at least 3 characters. The FTS DDL lives in `drizzle/0001_pegawai_fts.sql` because drizzle-kit cannot generate virtual tables.
 
+List endpoints use cursor pagination. Send `sort` (default `id`), `order` (default `desc`), and on the next request `cursor` plus `cursor_value` when sorting by a non-`id` column. Responses return `next_cursor`, `next_cursor_value`, and `has_more`. Page size is fixed by `PAGE_SIZE` in `src/shared/config.ts`.
+
 See `AGENTS.md` for the full conventions (audit columns, soft delete, transactions, search, auth, API shape).

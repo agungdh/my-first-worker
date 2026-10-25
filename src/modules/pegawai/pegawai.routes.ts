@@ -97,8 +97,11 @@ class PegawaiList extends OpenAPIRoute {
 		const data = await this.getValidatedData<typeof this.schema>();
 		const query = data.query;
 
-		const pegawai = await c.get("services").pegawai.list({
-			page: query.page,
+		const page = await c.get("services").pegawai.list({
+			cursor: query.cursor,
+			cursorValue: query.cursor_value,
+			sort: query.sort,
+			order: query.order,
 			search: query.search,
 			role: query.role,
 			status: query.status,
@@ -108,7 +111,12 @@ class PegawaiList extends OpenAPIRoute {
 			kategoriKebutuhanJamPelatihan: query.kategori_kebutuhan_jam_pelatihan,
 		});
 
-		return success({ pegawai: pegawai.map(toPegawaiResponse) });
+		return success({
+			pegawai: page.items.map(toPegawaiResponse),
+			next_cursor: page.nextCursor,
+			next_cursor_value: page.nextCursorValue,
+			has_more: page.hasMore,
+		});
 	}
 }
 

@@ -2,16 +2,19 @@ import { type HonoOpenAPIRouterType, OpenAPIRoute } from "chanfana";
 import { z } from "zod";
 import { type AppContext } from "../../shared/types";
 import { success, SuccessSchema } from "../../shared/http";
-import { BidangInputSchema, BidangListSchema, BidangSchema } from "./bidang.schema";
+import {
+	BidangInputSchema,
+	BidangListQuerySchema,
+	BidangListSchema,
+	BidangSchema,
+} from "./bidang.schema";
 
 class BidangList extends OpenAPIRoute {
 	schema = {
 		tags: ["Bidang"],
 		summary: "List bidang",
 		request: {
-			query: z.object({
-				page: z.number().default(0).describe("Page number (0-based)"),
-			}),
+			query: BidangListQuerySchema,
 		},
 		responses: {
 			"200": {
@@ -28,9 +31,20 @@ class BidangList extends OpenAPIRoute {
 	async handle(c: AppContext) {
 		const data = await this.getValidatedData<typeof this.schema>();
 
-		const bidang = await c.get("services").bidang.list(data.query.page);
+		const query = data.query;
+		const page = await c.get("services").bidang.list({
+			cursor: query.cursor,
+			cursorValue: query.cursor_value,
+			sort: query.sort,
+			order: query.order,
+		});
 
-		return success({ bidang });
+		return success({
+			bidang: page.items,
+			next_cursor: page.nextCursor,
+			next_cursor_value: page.nextCursorValue,
+			has_more: page.hasMore,
+		});
 	}
 }
 

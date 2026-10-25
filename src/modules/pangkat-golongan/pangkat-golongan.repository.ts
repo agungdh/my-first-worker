@@ -1,9 +1,14 @@
-import { and, asc, eq, isNull, sql } from "drizzle-orm";
+import { and, asc, desc, eq, isNull, sql } from "drizzle-orm";
 import { BaseRepository } from "../../db/baseRepository";
 import { auditCreate, auditDelete, auditUpdate } from "../../db/audit";
 import { pangkatGolongans, users } from "../../db/schema";
 import { PAGE_SIZE } from "../../shared/config";
-import type { PangkatGolongan, PangkatGolonganInput } from "./pangkat-golongan.domain";
+import { buildPage, keysetCondition, type Page } from "../../shared/pagination";
+import type {
+	PangkatGolongan,
+	PangkatGolonganFilter,
+	PangkatGolonganInput,
+} from "./pangkat-golongan.domain";
 
 type PangkatGolonganColumns = {
 	id: typeof pangkatGolongans.id;
@@ -21,19 +26,59 @@ const columns: PangkatGolonganColumns = {
 	ruang: pangkatGolongans.ruang,
 };
 
+const sortColumns = {
+	jenjang: pangkatGolongans.jenjang,
+	pangkat: pangkatGolongans.pangkat,
+	golongan: pangkatGolongans.golongan,
+	ruang: pangkatGolongans.ruang,
+};
+
 export class PangkatGolonganRepository extends BaseRepository<typeof pangkatGolongans> {
 	constructor(d1: D1Database) {
 		super(d1, pangkatGolongans);
 	}
 
-	async list(page: number): Promise<PangkatGolongan[]> {
-		return this.db
+	async list(filter: PangkatGolonganFilter): Promise<Page<PangkatGolongan>> {
+		const sortColumn = filter.sort === "id" ? null : sortColumns[filter.sort];
+		const conditions =
+			filter.cursor === undefined
+				? []
+				: [
+						keysetCondition(
+							sortColumn,
+							filter.cursorValue ?? null,
+							pangkatGolongans.id,
+							filter.cursor,
+							filter.order,
+						),
+					];
+
+		const direction = filter.order === "asc" ? asc : desc;
+		const orderBy = sortColumn
+			? [direction(sortColumn), direction(pangkatGolongans.id)]
+			: [direction(pangkatGolongans.id)];
+
+		const rows = await this.db
 			.select(columns)
 			.from(pangkatGolongans)
-			.where(this.liveWhere())
-			.orderBy(asc(pangkatGolongans.golongan), asc(pangkatGolongans.ruang), asc(pangkatGolongans.pangkat))
-			.limit(PAGE_SIZE)
-			.offset(page * PAGE_SIZE);
+			.where(this.liveWhere(...conditions))
+			.orderBy(...orderBy)
+			.limit(PAGE_SIZE + 1);
+
+		return buildPage(rows, (row) => row.id, (row) => {
+			switch (filter.sort) {
+				case "id":
+					return null;
+				case "jenjang":
+					return row.jenjang;
+				case "pangkat":
+					return row.pangkat;
+				case "golongan":
+					return row.golongan;
+				case "ruang":
+					return row.ruang;
+			}
+		});
 	}
 
 	async findById(id: number): Promise<PangkatGolongan | null> {

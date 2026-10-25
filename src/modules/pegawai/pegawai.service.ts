@@ -4,6 +4,7 @@ import {
 	UnauthorizedException,
 	UnprocessableEntityException,
 } from "chanfana";
+import { assertCursorValue, type Page } from "../../shared/pagination";
 import { BidangRepository } from "../bidang/bidang.repository";
 import { PangkatGolonganRepository } from "../pangkat-golongan/pangkat-golongan.repository";
 import { hashPassword, verifyPassword } from "./pegawai.password";
@@ -24,7 +25,9 @@ export class PegawaiService {
 		private readonly pangkatGolonganRepo: PangkatGolonganRepository,
 	) {}
 
-	async list(filter: PegawaiFilter): Promise<Pegawai[]> {
+	async list(filter: PegawaiFilter): Promise<Page<Pegawai>> {
+		assertCursorValue(filter.cursor, filter.cursorValue, filter.sort === "id");
+
 		return this.repo.list(filter);
 	}
 

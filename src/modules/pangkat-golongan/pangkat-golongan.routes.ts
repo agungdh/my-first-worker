@@ -4,6 +4,7 @@ import { type AppContext } from "../../shared/types";
 import { success, SuccessSchema } from "../../shared/http";
 import {
 	PangkatGolonganInputSchema,
+	PangkatGolonganListQuerySchema,
 	PangkatGolonganListSchema,
 	PangkatGolonganSchema,
 } from "./pangkat-golongan.schema";
@@ -13,9 +14,7 @@ class PangkatGolonganList extends OpenAPIRoute {
 		tags: ["Pangkat Golongan"],
 		summary: "List pangkat golongan",
 		request: {
-			query: z.object({
-				page: z.number().default(0).describe("Page number (0-based)"),
-			}),
+			query: PangkatGolonganListQuerySchema,
 		},
 		responses: {
 			"200": {
@@ -32,9 +31,20 @@ class PangkatGolonganList extends OpenAPIRoute {
 	async handle(c: AppContext) {
 		const data = await this.getValidatedData<typeof this.schema>();
 
-		const pangkat_golongan = await c.get("services").pangkatGolongan.list(data.query.page);
+		const query = data.query;
+		const page = await c.get("services").pangkatGolongan.list({
+			cursor: query.cursor,
+			cursorValue: query.cursor_value,
+			sort: query.sort,
+			order: query.order,
+		});
 
-		return success({ pangkat_golongan });
+		return success({
+			pangkat_golongan: page.items,
+			next_cursor: page.nextCursor,
+			next_cursor_value: page.nextCursorValue,
+			has_more: page.hasMore,
+		});
 	}
 }
 

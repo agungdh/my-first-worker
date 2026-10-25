@@ -1,3 +1,5 @@
+import type { SortOrder } from "../../shared/pagination";
+
 export interface PangkatGolongan {
 	id: number;
 	jenjang: string;
@@ -11,4 +13,13 @@ export interface PangkatGolonganInput {
 	pangkat: string;
 	golongan: string;
 	ruang: string;
+}
+
+export type PangkatGolonganSort = "id" | "jenjang" | "pangkat" | "golongan" | "ruang";
+
+export interface PangkatGolonganFilter {
+	cursor?: number;
+	cursorValue?: string;
+	sort: PangkatGolonganSort;
+	order: SortOrder;
 }

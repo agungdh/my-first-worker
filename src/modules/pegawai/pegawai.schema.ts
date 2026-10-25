@@ -1,5 +1,10 @@
 import { z } from "zod";
 import {
+	CursorSchema,
+	CursorValueSchema,
+	SortOrderSchema,
+} from "../../shared/pagination";
+import {
 	KATEGORI_JABATAN,
 	KATEGORI_KEBUTUHAN_JAM_PELATIHAN,
 	NIP_PATTERN,
@@ -48,7 +53,12 @@ export const PegawaiUpdateSchema = z.strictObject({
 });
 
 export const PegawaiListQuerySchema = z.object({
-	page: z.number().default(0).describe("Page number (0-based)"),
+	cursor: CursorSchema.optional().describe("Id of the last item from the previous page"),
+	cursor_value: CursorValueSchema.optional().describe(
+		"Sort value of the last item; required when sort is not id",
+	),
+	sort: z.enum(["id", "nama", "nip"]).default("id").describe("Sort column"),
+	order: SortOrderSchema.describe("Sort direction"),
 	search: z
 		.string()
 		.trim()
@@ -93,6 +103,9 @@ export const PegawaiSchema = z.object({
 export const PegawaiListSchema = z.object({
 	success: z.boolean(),
 	pegawai: PegawaiSchema.array(),
+	next_cursor: z.number().nullable(),
+	next_cursor_value: z.string().nullable(),
+	has_more: z.boolean(),
 });
 
 export const PegawaiAuthSchema = z.object({

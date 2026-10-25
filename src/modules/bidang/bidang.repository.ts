@@ -1,23 +1,48 @@
-import { and, asc, eq, isNull, sql } from "drizzle-orm";
+import { and, asc, desc, eq, isNull, sql } from "drizzle-orm";
 import { BaseRepository } from "../../db/baseRepository";
 import { auditCreate, auditDelete, auditUpdate } from "../../db/audit";
 import { bidangs, users } from "../../db/schema";
 import { PAGE_SIZE } from "../../shared/config";
-import type { Bidang, BidangInput } from "./bidang.domain";
+import { buildPage, keysetCondition, type Page } from "../../shared/pagination";
+import type { Bidang, BidangFilter, BidangInput } from "./bidang.domain";
 
 export class BidangRepository extends BaseRepository<typeof bidangs> {
 	constructor(d1: D1Database) {
 		super(d1, bidangs);
 	}
 
-	async list(page: number): Promise<Bidang[]> {
-		return this.db
+	async list(filter: BidangFilter): Promise<Page<Bidang>> {
+		const sortColumn = filter.sort === "bidang" ? bidangs.bidang : null;
+		const conditions =
+			filter.cursor === undefined
+				? []
+				: [
+						keysetCondition(
+							sortColumn,
+							filter.cursorValue ?? null,
+							bidangs.id,
+							filter.cursor,
+							filter.order,
+						),
+					];
+
+		const direction = filter.order === "asc" ? asc : desc;
+		const orderBy = sortColumn
+			? [direction(sortColumn), direction(bidangs.id)]
+			: [direction(bidangs.id)];
+
+		const rows = await this.db
 			.select({ id: bidangs.id, bidang: bidangs.bidang })
 			.from(bidangs)
-			.where(this.liveWhere())
-			.orderBy(asc(bidangs.bidang))
-			.limit(PAGE_SIZE)
-			.offset(page * PAGE_SIZE);
+			.where(this.liveWhere(...conditions))
+			.orderBy(...orderBy)
+			.limit(PAGE_SIZE + 1);
+
+		return buildPage(
+			rows,
+			(row) => row.id,
+			(row) => (filter.sort === "bidang" ? row.bidang : null),
+		);
 	}
 
 	async findById(id: number): Promise<Bidang | null> {

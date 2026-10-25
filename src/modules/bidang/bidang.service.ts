@@ -1,12 +1,15 @@
 import { ConflictException, NotFoundException } from "chanfana";
+import { assertCursorValue, type Page } from "../../shared/pagination";
 import { BidangRepository } from "./bidang.repository";
-import type { Bidang, BidangInput } from "./bidang.domain";
+import type { Bidang, BidangFilter, BidangInput } from "./bidang.domain";
 
 export class BidangService {
 	constructor(private readonly repo: BidangRepository) {}
 
-	async list(page: number): Promise<Bidang[]> {
-		return this.repo.list(page);
+	async list(filter: BidangFilter): Promise<Page<Bidang>> {
+		assertCursorValue(filter.cursor, filter.cursorValue, filter.sort === "id");
+
+		return this.repo.list(filter);
 	}
 
 	async get(id: number): Promise<Bidang> {

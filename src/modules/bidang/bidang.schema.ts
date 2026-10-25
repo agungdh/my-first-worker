@@ -1,7 +1,17 @@
 import { z } from "zod";
+import { CursorSchema, CursorValueSchema, SortOrderSchema } from "../../shared/pagination";
 
 export const BidangInputSchema = z.strictObject({
 	bidang: z.string().trim().min(1).max(255),
+});
+
+export const BidangListQuerySchema = z.object({
+	cursor: CursorSchema.optional().describe("Id of the last item from the previous page"),
+	cursor_value: CursorValueSchema.optional().describe(
+		"Sort value of the last item; required when sort is not id"
+	),
+	sort: z.enum(["id", "bidang"]).default("id").describe("Sort column"),
+	order: SortOrderSchema.describe("Sort direction"),
 });
 
 export const BidangSchema = z.object({
@@ -12,4 +22,7 @@ export const BidangSchema = z.object({
 export const BidangListSchema = z.object({
 	success: z.boolean(),
 	bidang: BidangSchema.array(),
+	next_cursor: z.number().nullable(),
+	next_cursor_value: z.string().nullable(),
+	has_more: z.boolean(),
 });

@@ -1,8 +1,9 @@
-import { asc, eq, isNull, sql } from "drizzle-orm";
+import { asc, desc, eq, isNull, sql } from "drizzle-orm";
 import { BaseRepository } from "../../db/baseRepository";
 import { auditCreate, auditDelete, auditUpdate } from "../../db/audit";
 import { bidangs, pangkatGolongans, users } from "../../db/schema";
 import { PAGE_SIZE } from "../../shared/config";
+import { buildPage, keysetCondition, type Page } from "../../shared/pagination";
 import type {
 	CreatePegawaiInput,
 	Pegawai,
@@ -57,8 +58,22 @@ export class PegawaiRepository extends BaseRepository<typeof users> {
 		super(d1, users);
 	}
 
-	async list(filter: PegawaiFilter): Promise<Pegawai[]> {
+	async list(filter: PegawaiFilter): Promise<Page<Pegawai>> {
 		const conditions = [];
+		const sortColumn =
+			filter.sort === "nama" ? users.nama : filter.sort === "nip" ? users.nip : null;
+
+		if (filter.cursor !== undefined) {
+			conditions.push(
+				keysetCondition(
+					sortColumn,
+					filter.cursorValue ?? null,
+					users.id,
+					filter.cursor,
+					filter.order,
+				),
+			);
+		}
 
 		if (filter.search) {
 			conditions.push(
@@ -78,17 +93,29 @@ export class PegawaiRepository extends BaseRepository<typeof users> {
 			);
 		}
 
+		const direction = filter.order === "asc" ? asc : desc;
+		const orderBy = sortColumn
+			? [direction(sortColumn), direction(users.id)]
+			: [direction(users.id)];
+
 		const rows = await this.db
 			.select(selectColumns)
 			.from(users)
 			.innerJoin(bidangs, eq(bidangs.id, users.bidangId))
 			.leftJoin(pangkatGolongans, eq(pangkatGolongans.id, users.pangkatGolonganId))
 			.where(this.liveWhere(isNull(bidangs.deletedAt), ...conditions))
-			.orderBy(asc(users.nama))
-			.limit(PAGE_SIZE)
-			.offset(filter.page * PAGE_SIZE);
+			.orderBy(...orderBy)
+			.limit(PAGE_SIZE + 1);
 
-		return rows.map(toPegawai);
+		return buildPage(
+			rows.map(toPegawai),
+			(pegawai) => pegawai.id,
+			(pegawai) => {
+				if (filter.sort === "nama") return pegawai.nama;
+				if (filter.sort === "nip") return pegawai.nip;
+				return null;
+			},
+		);
 	}
 
 	async findById(id: number): Promise<Pegawai | null> {
