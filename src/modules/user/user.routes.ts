@@ -1,7 +1,7 @@
 import { type HonoOpenAPIRouterType, OpenAPIRoute } from "chanfana";
 import { z } from "zod";
 import { type AppContext } from "../../shared/types";
-import { success } from "../../shared/http";
+import { success, SuccessSchema } from "../../shared/http";
 import {
 	clearAuthCookie,
 	setAuthCookie,
@@ -32,9 +32,7 @@ class UserRegister extends OpenAPIRoute {
 				description: "User registered and auth cookie set",
 				content: {
 					"application/json": {
-						schema: z.object({
-							success: z.boolean(),
-						}),
+						schema: SuccessSchema,
 					},
 				},
 			},
@@ -99,9 +97,7 @@ class UserLogout extends OpenAPIRoute {
 				description: "Auth cookie cleared",
 				content: {
 					"application/json": {
-						schema: z.object({
-							success: z.boolean(),
-						}),
+						schema: SuccessSchema,
 					},
 				},
 			},

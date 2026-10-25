@@ -1,7 +1,7 @@
 import { type HonoOpenAPIRouterType, OpenAPIRoute } from "chanfana";
 import { z } from "zod";
 import { type AppContext } from "../../shared/types";
-import { success } from "../../shared/http";
+import { success, SuccessSchema } from "../../shared/http";
 import { TaskSchema, TaskUpdateSchema } from "./task.schema";
 
 class TaskCreate extends OpenAPIRoute {
@@ -22,9 +22,7 @@ class TaskCreate extends OpenAPIRoute {
 				description: "Task created",
 				content: {
 					"application/json": {
-						schema: z.object({
-							success: z.boolean(),
-						}),
+						schema: SuccessSchema,
 					},
 				},
 			},
@@ -141,9 +139,7 @@ class TaskUpdate extends OpenAPIRoute {
 				description: "Task updated",
 				content: {
 					"application/json": {
-						schema: z.object({
-							success: z.boolean(),
-						}),
+						schema: SuccessSchema,
 					},
 				},
 			},

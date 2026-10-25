@@ -1,7 +1,7 @@
 import { type HonoOpenAPIRouterType, OpenAPIRoute } from "chanfana";
 import { z } from "zod";
 import { type AppContext } from "../../shared/types";
-import { success } from "../../shared/http";
+import { success, SuccessSchema } from "../../shared/http";
 import {
 	ImageCreateSchema,
 	ImagePresignSchema,
@@ -13,10 +13,6 @@ import {
 const ImageResponseSchema = z.object({
 	success: z.boolean(),
 	image: ImageSchema,
-});
-
-const SuccessSchema = z.object({
-	success: z.boolean(),
 });
 
 const ImageParamsSchema = z.object({
