@@ -25,8 +25,4 @@ export class UserService {
 
 		return { id: record.id, username: record.username, name: record.name };
 	}
-
-	async find(id: number): Promise<User | null> {
-		return this.repo.findById(id);
-	}
 }

@@ -2,14 +2,10 @@ import { deleteCookie, getCookie, setCookie } from "hono/cookie";
 import type { MiddlewareHandler } from "hono";
 import { sign, verify } from "hono/jwt";
 import type { AppContext, AppEnv } from "./types";
+import type { User } from "../modules/user/user.domain";
 
 export const AUTH_COOKIE = "access_token";
 export const AUTH_TOKEN_TTL_SECONDS = 60 * 60 * 24 * 7;
-
-export interface AuthPayload {
-	id: number;
-	username: string;
-}
 
 const cookieOptions = {
 	httpOnly: true,
@@ -19,13 +15,14 @@ const cookieOptions = {
 	maxAge: AUTH_TOKEN_TTL_SECONDS,
 } as const;
 
-export async function signAuthToken(secret: string, payload: AuthPayload): Promise<string> {
+export async function signAuthToken(secret: string, user: User): Promise<string> {
 	const now = Math.floor(Date.now() / 1000);
 
 	return sign(
 		{
-			sub: payload.id,
-			username: payload.username,
+			sub: user.id,
+			username: user.username,
+			name: user.name,
 			iat: now,
 			exp: now + AUTH_TOKEN_TTL_SECONDS,
 		},
@@ -33,11 +30,18 @@ export async function signAuthToken(secret: string, payload: AuthPayload): Promi
 	);
 }
 
-export async function verifyAuthToken(secret: string, token: string): Promise<AuthPayload | null> {
+export async function verifyAuthToken(secret: string, token: string): Promise<User | null> {
 	try {
 		const payload = await verify(token, secret, "HS256");
-		if (typeof payload.sub !== "number" || typeof payload.username !== "string") return null;
-		return { id: payload.sub, username: payload.username };
+		if (
+			typeof payload.sub !== "number" ||
+			typeof payload.username !== "string" ||
+			typeof payload.name !== "string"
+		) {
+			return null;
+		}
+
+		return { id: payload.sub, username: payload.username, name: payload.name };
 	} catch {
 		return null;
 	}
@@ -70,10 +74,7 @@ export const requireAuth: MiddlewareHandler<AppEnv> = async (c, next) => {
 
 	const token = getAuthToken(c);
 
-	const payload = token ? await verifyAuthToken(c.env.JWT_SECRET, token) : null;
-	if (!payload) return unauthorized(c);
-
-	const user = await c.get("services").users.find(payload.id);
+	const user = token ? await verifyAuthToken(c.env.JWT_SECRET, token) : null;
 	if (!user) return unauthorized(c);
 
 	c.set("user", user);

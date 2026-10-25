@@ -30,17 +30,6 @@ export class UserRepository extends BaseRepository<typeof users> {
 		return this.toRecord(row);
 	}
 
-	async findById(id: number): Promise<User | null> {
-		const row = await this.db
-			.select()
-			.from(users)
-			.where(this.liveWhere(eq(users.id, id)))
-			.get();
-
-		if (!row) return null;
-		return this.toUser(row);
-	}
-
 	async create(input: CreateUserRecordInput): Promise<User> {
 		const [created] = await this.db
 			.insert(users)

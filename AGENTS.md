@@ -77,7 +77,6 @@ Credentials live on the `users` table (`username`, `name`, `password_hash`). Aut
 | `POST /api/auth/register` | Create a user, hash the password, and set the auth cookie |
 | `POST /api/auth/login` | Verify credentials and set the auth cookie |
 | `POST /api/auth/logout` | Clear the auth cookie |
-| `GET /api/auth/me` | Return the user referenced by the auth cookie |
 
 Rules:
 
@@ -85,9 +84,10 @@ Rules:
 - `password_hash` is internal only. It never appears in domain types, Zod/OpenAPI schemas, or API responses.
 - Usernames are unique case-insensitively (partial unique index on `lower(username)` where `deleted_at IS NULL`) and all lookups compare with `lower(username)`.
 - JWT helpers (`src/shared/auth.ts`) sign HS256 tokens with `JWT_SECRET` and a 7 day expiry, stored in an `HttpOnly`, `Secure`, `SameSite=Lax` cookie named `access_token`. Read the identity from that cookie instead of accepting tokens from headers.
+- The token carries the full user identity (`id` as `sub`, `username`, `name`). Route handlers get the current user from `c.get("user")` with no extra request, so **never** add a `/me` endpoint or a per-request user lookup: the frontend decodes/keeps the identity from login/register or the JWT payload.
 - `JWT_SECRET` is an environment secret. Set it locally in `.dev.vars` and remotely with `wrangler secret put JWT_SECRET`. Never commit the real value.
 - Protection is default-deny: `src/index.ts` wires `app.use("*", requireAuth)`, so every route requires auth unless listed in `publicRoutes` (`src/shared/auth.ts`) as `"METHOD /path"`. Currently public: register, login, logout, and the docs routes (`/`, `/redocs`, `/openapi.json`, `/openapi.yaml`). New public endpoints MUST be added there explicitly.
-- The guard verifies the cookie, loads the live user, sets `c.get("user")`, and returns 401 otherwise. Route handlers read the identity from that context variable instead of verifying tokens themselves.
+- The guard verifies the cookie signature only (no DB query), sets `c.get("user")` from the token claims, and returns 401 otherwise. Route handlers read the identity from that context variable instead of verifying tokens themselves. Consequence: profile changes are not reflected until the user logs in again, and a soft-deleted user keeps access until the token expires.
 - The guard returns a 401 JSON response directly instead of throwing chanfana's `UnauthorizedException`: `ApiException` is not a Hono `HTTPException`, so in middleware it would surface as a 500 through `app.onError`.
 - Chanfana drops headers set via `c.header()` when `handle()` returns a plain object. Any route that sets or clears a cookie MUST return `c.json(...)` so the `Set-Cookie` header survives.
 

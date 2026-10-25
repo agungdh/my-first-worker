@@ -1,4 +1,4 @@
-import { type HonoOpenAPIRouterType, OpenAPIRoute, UnauthorizedException } from "chanfana";
+import { type HonoOpenAPIRouterType, OpenAPIRoute } from "chanfana";
 import { z } from "zod";
 import { type AppContext } from "../../shared/types";
 import { success } from "../../shared/http";
@@ -44,10 +44,7 @@ class UserRegister extends OpenAPIRoute {
 
 		const user = await c.get("services").users.register(data.body);
 
-		const token = await signAuthToken(c.env.JWT_SECRET, {
-			id: user.id,
-			username: user.username,
-		});
+		const token = await signAuthToken(c.env.JWT_SECRET, user);
 		setAuthCookie(c, token);
 
 		return c.json(success({ user }), 201);
@@ -84,10 +81,7 @@ class UserLogin extends OpenAPIRoute {
 
 		const user = await c.get("services").users.login(data.body);
 
-		const token = await signAuthToken(c.env.JWT_SECRET, {
-			id: user.id,
-			username: user.username,
-		});
+		const token = await signAuthToken(c.env.JWT_SECRET, user);
 		setAuthCookie(c, token);
 
 		return c.json(success({ user }));
@@ -119,33 +113,8 @@ class UserLogout extends OpenAPIRoute {
 	}
 }
 
-class UserMe extends OpenAPIRoute {
-	schema = {
-		tags: ["Auth"],
-		summary: "Get the current authenticated user",
-		responses: {
-			"200": {
-				description: "Returns the current user",
-				content: {
-					"application/json": {
-						schema: UserResponseSchema,
-					},
-				},
-			},
-		},
-	};
-
-	async handle(c: AppContext) {
-		const user = c.get("user");
-		if (!user) throw new UnauthorizedException();
-
-		return success({ user });
-	}
-}
-
 export function registerUserRoutes(openapi: HonoOpenAPIRouterType<any>) {
 	openapi.post("/api/auth/register", UserRegister);
 	openapi.post("/api/auth/login", UserLogin);
 	openapi.post("/api/auth/logout", UserLogout);
-	openapi.get("/api/auth/me", UserMe);
 }
