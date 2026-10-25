@@ -1,6 +1,6 @@
 import { and, isNull, type SQL } from "drizzle-orm";
 import type { SQLiteColumn, SQLiteTable } from "drizzle-orm/sqlite-core";
-import { createDb, type Db } from "../db";
+import { createDb, type Db } from "./index";
 
 export type SoftDeleteTable = SQLiteTable & { deletedAt: SQLiteColumn };
 

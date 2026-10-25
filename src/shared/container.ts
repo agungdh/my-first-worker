@@ -1,5 +1,5 @@
-import { TaskRepository } from "../repositories/taskRepository";
-import { TaskService } from "../services/taskService";
+import { TaskRepository } from "../modules/task/task.repository";
+import { TaskService } from "../modules/task/task.service";
 
 export interface Services {
 	tasks: TaskService;

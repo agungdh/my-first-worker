@@ -19,6 +19,20 @@ For all limits and quotas, retrieve from the product's `/platform/limits/` page.
 
 Run `wrangler types` after changing bindings in wrangler.jsonc.
 
+## Project structure
+
+Code is organized per feature module under `src/modules/<domain>/`:
+
+| File | Purpose |
+|------|---------|
+| `<domain>.domain.ts` | Domain types (no DB/audit fields) |
+| `<domain>.schema.ts` | Zod/OpenAPI request & response schemas |
+| `<domain>.repository.ts` | Drizzle data access; extends `BaseRepository` |
+| `<domain>.service.ts` | Business rules; throws chanfana exceptions |
+| `<domain>.routes.ts` | Chanfana endpoints + route registration |
+
+Shared code (container, errors, http, types) lives in `src/shared/`, DB plumbing in `src/db/`. A new domain is a new folder in `src/modules/`, wired through `src/routes/index.ts` and `src/shared/container.ts`.
+
 ## Database (D1 + Drizzle)
 
 Schema lives in `src/db/schema.ts`, migrations in `drizzle/`.
@@ -49,8 +63,8 @@ Rules:
 - All audit columns are nullable and have no database default. Values are written pre-persist by the application through `auditCreate()` / `auditUpdate()` / `auditDelete()`.
 - Timestamps are epoch milliseconds (`Date.now()`), never ISO strings or SQLite datetime text.
 - `*_by` are nullable integers, the same type as the user id. There is no auth yet, so they are written as `null`, but always go through the audit helpers so a real actor can be wired in one place later.
-- Audit columns are internal only. Never add them to domain types (`src/domain/*`), Zod/OpenAPI schemas (`src/types.ts`), endpoint payloads, or API responses. Repositories map DB rows to domain objects and must drop audit fields.
-- Deletes are soft: set `deleted_at` / `deleted_by` instead of removing rows. Repositories extend `BaseRepository` (`src/repositories/baseRepository.ts`) and every read (list, get, update target) MUST filter through `liveWhere(...)`, which adds `isNull(table.deletedAt)`.
+- Audit columns are internal only. Never add them to domain types (`src/modules/*/*.domain.ts`), Zod/OpenAPI schemas (`src/modules/*/*.schema.ts`), endpoint payloads, or API responses. Repositories map DB rows to domain objects and must drop audit fields.
+- Deletes are soft: set `deleted_at` / `deleted_by` instead of removing rows. Repositories extend `BaseRepository` (`src/db/baseRepository.ts`) and every read (list, get, update target) MUST filter through `liveWhere(...)`, which adds `isNull(table.deletedAt)`.
 - Unique constraints MUST be partial unique indexes scoped to live rows and case-insensitive: `uniqueIndex("...").on(sql`lower(${table.column})`).where(sql`${table.deletedAt} IS NULL`)`. Never use `.unique()` on a column, otherwise a soft-deleted row keeps blocking reuse of that value.
 - Queries that filter by a unique text column (get, update, delete target) MUST compare with `lower(column)` too (e.g. `eq(sql`lower(${table.slug})`, value.toLowerCase())`). Otherwise a row stored with different casing won't match the uniqueness semantics of the index.
 

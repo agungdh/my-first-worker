@@ -1,6 +1,6 @@
 import { ConflictException, NotFoundException } from "chanfana";
-import { TaskRepository } from "../repositories/taskRepository";
-import type { Task, CreateTaskInput, UpdateTaskInput } from "../domain/task";
+import { TaskRepository } from "./task.repository";
+import type { Task, CreateTaskInput, UpdateTaskInput } from "./task.domain";
 
 export class TaskService {
 	constructor(private readonly repo: TaskRepository) {}

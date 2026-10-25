@@ -1,8 +1,8 @@
 import { eq, sql } from "drizzle-orm";
-import { BaseRepository } from "./baseRepository";
-import { tasks } from "../db/schema";
-import { auditCreate, auditDelete, auditUpdate } from "../db/audit";
-import type { Task, CreateTaskInput, UpdateTaskInput } from "../domain/task";
+import { BaseRepository } from "../../db/baseRepository";
+import { tasks } from "../../db/schema";
+import { auditCreate, auditDelete, auditUpdate } from "../../db/audit";
+import type { Task, CreateTaskInput, UpdateTaskInput } from "./task.domain";
 
 export class TaskRepository extends BaseRepository<typeof tasks> {
 	constructor(d1: D1Database) {
