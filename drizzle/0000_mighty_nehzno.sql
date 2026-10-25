@@ -13,4 +13,4 @@ CREATE TABLE `tasks` (
 	`deleted_by` integer
 );
 --> statement-breakpoint
-CREATE UNIQUE INDEX `tasks_slug_unique` ON `tasks` (`slug`);
+CREATE UNIQUE INDEX `tasks_slug_unique` ON `tasks` (`slug`) WHERE "tasks"."deleted_at" IS NULL;

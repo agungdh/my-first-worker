@@ -1,15 +1,24 @@
-import { sqliteTable, text, integer } from "drizzle-orm/sqlite-core";
+import { sql } from "drizzle-orm";
+import { sqliteTable, text, integer, uniqueIndex } from "drizzle-orm/sqlite-core";
 import { auditColumns } from "./audit";
 
-export const tasks = sqliteTable("tasks", {
-	id: integer("id").primaryKey({ autoIncrement: true }),
-	name: text("name").notNull(),
-	slug: text("slug").notNull().unique(),
-	description: text("description"),
-	completed: integer("completed", { mode: "boolean" }).notNull().default(false),
-	dueDate: text("due_date").notNull(),
-	...auditColumns,
-});
+export const tasks = sqliteTable(
+	"tasks",
+	{
+		id: integer("id").primaryKey({ autoIncrement: true }),
+		name: text("name").notNull(),
+		slug: text("slug").notNull(),
+		description: text("description"),
+		completed: integer("completed", { mode: "boolean" }).notNull().default(false),
+		dueDate: text("due_date").notNull(),
+		...auditColumns,
+	},
+	(table) => [
+		uniqueIndex("tasks_slug_unique")
+			.on(table.slug)
+			.where(sql`${table.deletedAt} IS NULL`),
+	],
+);
 
 export type Task = typeof tasks.$inferSelect;
 export type NewTask = typeof tasks.$inferInsert;

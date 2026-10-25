@@ -1,7 +1,7 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "96689d39-afcd-4b67-86d9-80ad6e5d3dc3",
+  "id": "4397ad1c-99b0-48da-b2b2-5ccbd9561a42",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "tasks": {
@@ -99,7 +99,8 @@
           "columns": [
             "slug"
           ],
-          "isUnique": true
+          "isUnique": true,
+          "where": "\"tasks\".\"deleted_at\" IS NULL"
         }
       },
       "foreignKeys": {},
