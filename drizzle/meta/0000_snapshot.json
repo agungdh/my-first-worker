@@ -1,11 +1,11 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "05002980-cb26-4918-b9de-a6c4f6ac57ac",
+  "id": "97cfadb6-ef73-4cf6-9eff-c0b6ba679d78",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
-    "users": {
-      "name": "users",
+    "bidangs": {
+      "name": "bidangs",
       "columns": {
         "id": {
           "name": "id",
@@ -14,22 +14,8 @@
           "notNull": true,
           "autoincrement": true
         },
-        "username": {
-          "name": "username",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "name": {
-          "name": "name",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "password_hash": {
-          "name": "password_hash",
+        "bidang": {
+          "name": "bidang",
           "type": "text",
           "primaryKey": false,
           "notNull": true,
@@ -79,16 +65,307 @@
         }
       },
       "indexes": {
-        "users_username_unique": {
-          "name": "users_username_unique",
+        "bidangs_bidang_unique": {
+          "name": "bidangs_bidang_unique",
           "columns": [
-            "lower(\"username\")"
+            "lower(\"bidang\")"
           ],
           "isUnique": true,
-          "where": "\"users\".\"deleted_at\" IS NULL"
+          "where": "\"bidangs\".\"deleted_at\" IS NULL"
         }
       },
       "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "pangkat_golongans": {
+      "name": "pangkat_golongans",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": true
+        },
+        "jenjang": {
+          "name": "jenjang",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "pangkat": {
+          "name": "pangkat",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "golongan": {
+          "name": "golongan",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "ruang": {
+          "name": "ruang",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "deleted_at": {
+          "name": "deleted_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "created_by": {
+          "name": "created_by",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "updated_by": {
+          "name": "updated_by",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "deleted_by": {
+          "name": "deleted_by",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "pangkat_golongans_unique": {
+          "name": "pangkat_golongans_unique",
+          "columns": [
+            "lower(\"pangkat\")",
+            "lower(\"golongan\")",
+            "lower(\"ruang\")"
+          ],
+          "isUnique": true,
+          "where": "\"pangkat_golongans\".\"deleted_at\" IS NULL"
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "users": {
+      "name": "users",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": true
+        },
+        "nip": {
+          "name": "nip",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "nama": {
+          "name": "nama",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "password_hash": {
+          "name": "password_hash",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "role": {
+          "name": "role",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "status": {
+          "name": "status",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "bidang_id": {
+          "name": "bidang_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "pangkat_golongan_id": {
+          "name": "pangkat_golongan_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "jabatan": {
+          "name": "jabatan",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "peran": {
+          "name": "peran",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "kategori_jabatan": {
+          "name": "kategori_jabatan",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "kategori_kebutuhan_jam_pelatihan": {
+          "name": "kategori_kebutuhan_jam_pelatihan",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "deleted_at": {
+          "name": "deleted_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "created_by": {
+          "name": "created_by",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "updated_by": {
+          "name": "updated_by",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "deleted_by": {
+          "name": "deleted_by",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "users_nip_unique": {
+          "name": "users_nip_unique",
+          "columns": [
+            "lower(\"nip\")"
+          ],
+          "isUnique": true,
+          "where": "\"users\".\"deleted_at\" IS NULL"
+        },
+        "users_role_idx": {
+          "name": "users_role_idx",
+          "columns": [
+            "role"
+          ],
+          "isUnique": false
+        },
+        "users_status_idx": {
+          "name": "users_status_idx",
+          "columns": [
+            "status"
+          ],
+          "isUnique": false
+        },
+        "users_bidang_id_idx": {
+          "name": "users_bidang_id_idx",
+          "columns": [
+            "bidang_id"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "users_bidang_id_bidangs_id_fk": {
+          "name": "users_bidang_id_bidangs_id_fk",
+          "tableFrom": "users",
+          "tableTo": "bidangs",
+          "columnsFrom": [
+            "bidang_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "users_pangkat_golongan_id_pangkat_golongans_id_fk": {
+          "name": "users_pangkat_golongan_id_pangkat_golongans_id_fk",
+          "tableFrom": "users",
+          "tableTo": "pangkat_golongans",
+          "columnsFrom": [
+            "pangkat_golongan_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {},
       "checkConstraints": {}
@@ -103,9 +380,29 @@
   },
   "internal": {
     "indexes": {
-      "users_username_unique": {
+      "bidangs_bidang_unique": {
         "columns": {
-          "lower(\"username\")": {
+          "lower(\"bidang\")": {
+            "isExpression": true
+          }
+        }
+      },
+      "pangkat_golongans_unique": {
+        "columns": {
+          "lower(\"pangkat\")": {
+            "isExpression": true
+          },
+          "lower(\"golongan\")": {
+            "isExpression": true
+          },
+          "lower(\"ruang\")": {
+            "isExpression": true
+          }
+        }
+      },
+      "users_nip_unique": {
+        "columns": {
+          "lower(\"nip\")": {
             "isExpression": true
           }
         }

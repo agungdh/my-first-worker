@@ -1,10 +1,10 @@
 import type { Context } from "hono";
 import type { Services } from "./container";
-import type { User } from "../modules/user/user.domain";
+import type { PegawaiAuth } from "../modules/pegawai/pegawai.domain";
 
 export interface AppVariables {
 	services: Services;
-	user: User | null;
+	user: PegawaiAuth | null;
 }
 
 export type AppEnv = { Bindings: Env; Variables: AppVariables };
