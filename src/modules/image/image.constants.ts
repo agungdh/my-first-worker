@@ -15,7 +15,7 @@ export const IMAGE_EXTENSIONS: Record<ImageContentType, string> = {
 export const IMAGE_KEY_PREFIX = "images";
 
 export const IMAGE_KEY_PATTERN =
-	/^images\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\.(jpg|png|webp)$/;
+  /^images\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
 
 export const UPLOAD_URL_TTL_SECONDS = 600;
 

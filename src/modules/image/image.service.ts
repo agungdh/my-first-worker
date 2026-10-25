@@ -17,7 +17,7 @@ export class ImageService {
 	) {}
 
 	async presignUpload(input: PresignImageInput): Promise<PresignedUpload> {
-		const key = this.storage.createKey(input.content_type);
+		const key = this.storage.createKey();
 
 		return {
 			key,

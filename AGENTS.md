@@ -108,7 +108,7 @@ Rules:
 
 - 2 MB (`MAX_IMAGE_BYTES`) is the hard limit. The frontend compresses before uploading and rejects anything still over the limit; the API also rejects any presign request above it.
 - Size is enforced at R2, not only at the API: the presigned `PUT` signs `content-length` (and `content-type`) via aws4fetch `allHeaders: true`, so a body with a different byte count fails with `403 SignatureDoesNotMatch`. R2 does not support presigned POST policies, so this is the only upload-time size enforcement.
-- Keys are server-generated as `images/<uuid>.<ext>` and validated with `IMAGE_KEY_PATTERN`. Never accept an arbitrary key from the client.
+- Keys are server-generated as `images/<uuid>` (no extension) and validated with `IMAGE_KEY_PATTERN`. Never accept an arbitrary key from the client.
 - After uploading, the client calls `POST /api/images`. The service `HEAD`s the object, reads the real size and content type, and only then writes the row. Missing objects are rejected with 400.
 - `PUT` is a full replacement with `{ key, filename }`: a different key swaps the file and deletes the old object, the same key only renames.
 - Delete is soft in D1 and hard in R2.
@@ -119,7 +119,6 @@ Rules:
 - Bucket CORS lives in `r2-cors.json` and is applied with `npm run r2:cors`. It must allow the SPA origins for `GET`/`PUT`/`HEAD` with the `Content-Type` header, otherwise browser uploads fail at preflight.
 
 ## Local Explorer (Debugging & Inspection)
-
 When running `npx wrangler dev`, a Local Explorer API is available for inspecting and debugging local Workers, bindings, and storage state. The API base URL is printed in the terminal when the dev server starts.
 
 Key endpoints (relative to the dev server URL):

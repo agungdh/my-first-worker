@@ -1,13 +1,10 @@
 import { AwsClient } from "aws4fetch";
 import {
-	ALLOWED_IMAGE_TYPES,
 	DOWNLOAD_URL_TTL_SECONDS,
-	IMAGE_EXTENSIONS,
 	IMAGE_KEY_PREFIX,
 	UPLOAD_URL_TTL_SECONDS,
 	type ImageContentType,
 } from "./image.constants";
-
 export interface R2Config {
 	accountId: string;
 	bucket: string;
@@ -37,10 +34,9 @@ export class ImageStorage {
 				: null;
 	}
 
-	createKey(contentType: ImageContentType): string {
-		return `${IMAGE_KEY_PREFIX}/${crypto.randomUUID()}.${IMAGE_EXTENSIONS[contentType]}`;
+	createKey(): string {
+		return `${IMAGE_KEY_PREFIX}/${crypto.randomUUID()}`;
 	}
-
 	async createUploadUrl(
 		key: string,
 		contentType: ImageContentType,
@@ -92,11 +88,8 @@ export class ImageStorage {
 		}
 	}
 
-	static contentTypeFromKey(key: string): ImageContentType {
-		const extension = key.slice(key.lastIndexOf(".") + 1);
-		return (
-			ALLOWED_IMAGE_TYPES.find((type) => IMAGE_EXTENSIONS[type] === extension) ?? "image/jpeg"
-		);
+	static contentTypeFromKey(_key: string): ImageContentType {
+		return "image/jpeg";
 	}
 
 	private objectUrl(key: string): string {
