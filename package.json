@@ -8,6 +8,7 @@
     "start": "wrangler dev",
     "migrate": "wrangler d1 migrations apply my-first-worker-db --local",
     "r2:cors": "wrangler r2 bucket cors set my-first-worker-images --file r2-cors.json",
+    "r2:cors:dev": "wrangler r2 bucket cors set my-first-worker-images-dev --file r2-cors.json",
     "cf-typegen": "wrangler types"
   },
   "dependencies": {

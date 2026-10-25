@@ -1,4 +1,6 @@
 JWT_SECRET=replace-with-a-random-64-char-hex-string
 CORS_ORIGINS=http://localhost:4200,http://127.0.0.1:4200
+R2_ACCOUNT_ID=d7e260664c63a47664d2f502fb2a0f0b
+R2_BUCKET=my-first-worker-images-dev
 R2_ACCESS_KEY_ID=replace-with-r2-access-key-id
 R2_SECRET_ACCESS_KEY=replace-with-r2-secret-access-key
