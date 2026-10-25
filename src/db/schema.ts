@@ -41,3 +41,23 @@ export const users = sqliteTable(
 
 export type UserRow = typeof users.$inferSelect;
 export type NewUserRow = typeof users.$inferInsert;
+
+export const images = sqliteTable(
+	"images",
+	{
+		id: integer("id").primaryKey({ autoIncrement: true }),
+		key: text("key").notNull(),
+		filename: text("filename").notNull(),
+		contentType: text("content_type").notNull(),
+		size: integer("size").notNull(),
+		...auditColumns,
+	},
+	(table) => [
+		uniqueIndex("images_key_unique")
+			.on(sql`lower(${table.key})`)
+			.where(sql`${table.deletedAt} IS NULL`),
+	],
+);
+
+export type ImageRow = typeof images.$inferSelect;
+export type NewImageRow = typeof images.$inferInsert;

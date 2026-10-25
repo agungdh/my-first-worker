@@ -15,6 +15,13 @@
       "when": 1792896020839,
       "tag": "0001_material_mathemanic",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1792902793261,
+      "tag": "0002_chief_true_believers",
+      "breakpoints": true
     }
   ]
 }

@@ -14,8 +14,18 @@
 	"vars": {
 		// Production SPA origins allowed to call this API with credentials.
 		// Comma-separated; local development origins live in .dev.vars instead.
-		"CORS_ORIGINS": "https://rakawik.my.id"
+		"CORS_ORIGINS": "https://rakawik.my.id",
+		// Account id and bucket used to build presigned R2 URLs.
+		// R2_ACCESS_KEY_ID / R2_SECRET_ACCESS_KEY are secrets (see .dev.vars.example).
+		"R2_ACCOUNT_ID": "d7e260664c63a47664d2f502fb2a0f0b",
+		"R2_BUCKET": "my-first-worker-images"
 	},
+	"r2_buckets": [
+		{
+			"binding": "IMAGES",
+			"bucket_name": "my-first-worker-images"
+		}
+	],
 	"d1_databases": [
 		{
 			"binding": "DB",

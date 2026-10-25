@@ -91,6 +91,31 @@ Rules:
 - The guard returns a 401 JSON response directly instead of throwing chanfana's `UnauthorizedException`: `ApiException` is not a Hono `HTTPException`, so in middleware it would surface as a 500 through `app.onError`.
 - Chanfana drops headers set via `c.header()` when `handle()` returns a plain object. Any route that sets or clears a cookie MUST return `c.json(...)` so the `Set-Cookie` header survives.
 
+## Images (R2)
+
+Image files live in the `my-first-worker-images` R2 bucket, upload straight from the browser through presigned URLs, and their metadata lives in the `images` table. Endpoints are in `src/modules/image/image.routes.ts`:
+
+| Endpoint | Purpose |
+|----------|---------|
+| `POST /api/images/presign` | Sign a short-lived (600s) `PUT` URL for an already compressed image |
+| `POST /api/images` | Confirm the upload; stores metadata after checking the object in R2 |
+| `GET /api/images` | List images with 1h presigned download URLs |
+| `GET /api/images/:imageId` | Fetch one image |
+| `PUT /api/images/:imageId` | Rename, or replace the file with a newly uploaded key |
+| `DELETE /api/images/:imageId` | Soft delete the row and remove the R2 object |
+
+Rules:
+
+- 2 MB (`MAX_IMAGE_BYTES`) is the hard limit. The frontend compresses before uploading and rejects anything still over the limit; the API also rejects any presign request above it.
+- Size is enforced at R2, not only at the API: the presigned `PUT` signs `content-length` (and `content-type`) via aws4fetch `allHeaders: true`, so a body with a different byte count fails with `403 SignatureDoesNotMatch`. R2 does not support presigned POST policies, so this is the only upload-time size enforcement.
+- Keys are server-generated as `images/<uuid>.<ext>` and validated with `IMAGE_KEY_PATTERN`. Never accept an arbitrary key from the client.
+- After uploading, the client calls `POST /api/images`. The service `HEAD`s the object, reads the real size and content type, and only then writes the row. Missing objects are rejected with 400.
+- `PUT` is a full replacement with `{ key, filename }`: a different key swaps the file and deletes the old object, the same key only renames.
+- Delete is soft in D1 and hard in R2.
+- Download URLs are presigned GETs valid for 1 hour, regenerated on every list/detail response.
+- `R2_ACCOUNT_ID` and `R2_BUCKET` are vars in `wrangler.jsonc`; `R2_ACCESS_KEY_ID` and `R2_SECRET_ACCESS_KEY` are secrets (`.dev.vars`, `wrangler secret put ...`). The `IMAGES` binding is used for `head`/`delete`.
+- Bucket CORS lives in `r2-cors.json` and is applied with `npm run r2:cors`. It must allow the SPA origins for `GET`/`PUT`/`HEAD` with the `Content-Type` header, otherwise browser uploads fail at preflight.
+
 ## Local Explorer (Debugging & Inspection)
 
 When running `npx wrangler dev`, a Local Explorer API is available for inspecting and debugging local Workers, bindings, and storage state. The API base URL is printed in the terminal when the dev server starts.

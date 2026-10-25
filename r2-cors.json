@@ -1,0 +1,13 @@
+{
+	"rules": [
+		{
+			"allowed": {
+				"origins": ["http://localhost:4200", "https://rakawik.my.id"],
+				"methods": ["GET", "PUT", "HEAD"],
+				"headers": ["Content-Type"]
+			},
+			"exposeHeaders": ["ETag"],
+			"maxAgeSeconds": 3600
+		}
+	]
+}
