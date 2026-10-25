@@ -15,9 +15,9 @@ export interface CreateTaskInput {
 }
 
 export interface UpdateTaskInput {
-	name?: string;
-	slug?: string;
-	description?: string;
-	completed?: boolean;
-	due_date?: string;
+	name: string;
+	slug: string;
+	description: string | null;
+	completed: boolean;
+	due_date: string;
 }

@@ -41,7 +41,7 @@ export class TaskRepository extends BaseRepository<typeof tasks> {
 			.values({
 				name: input.name,
 				slug: input.slug,
-				description: input.description,
+				description: input.description || null,
 				completed: input.completed,
 				dueDate: input.due_date,
 				...auditCreate(),
@@ -54,16 +54,16 @@ export class TaskRepository extends BaseRepository<typeof tasks> {
 	}
 
 	async update(slug: string, input: UpdateTaskInput): Promise<Task | null> {
-		const setValues: Record<string, unknown> = {};
-		if (input.name !== undefined) setValues.name = input.name;
-		if (input.slug !== undefined) setValues.slug = input.slug;
-		if (input.description !== undefined) setValues.description = input.description;
-		if (input.completed !== undefined) setValues.completed = input.completed;
-		if (input.due_date !== undefined) setValues.dueDate = input.due_date;
-
 		const [updated] = await this.db
 			.update(tasks)
-			.set({ ...setValues, ...auditUpdate() })
+			.set({
+				name: input.name,
+				slug: input.slug,
+				description: input.description || null,
+				completed: input.completed,
+				dueDate: input.due_date,
+				...auditUpdate(),
+			})
 			.where(this.liveSlugWhere(slug))
 			.returning();
 

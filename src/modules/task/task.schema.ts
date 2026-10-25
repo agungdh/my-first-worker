@@ -8,10 +8,10 @@ export const TaskSchema = z.object({
 	due_date: z.iso.date(),
 });
 
-export const TaskUpdateSchema = z.object({
-	name: z.string().optional(),
-	slug: z.string().optional(),
-	description: z.string().optional(),
-	completed: z.boolean().optional(),
-	due_date: z.iso.date().optional(),
+export const TaskUpdateSchema = z.strictObject({
+	name: z.string(),
+	slug: z.string(),
+	description: z.string().nullable(),
+	completed: z.boolean(),
+	due_date: z.iso.date(),
 });
