@@ -1,7 +1,7 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "521b20a0-4983-4a06-9529-b2507cfcd176",
+  "id": "e794c42e-1f9c-443d-b352-442058d71221",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "bidangs": {
@@ -329,8 +329,8 @@
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onDelete": "restrict",
+          "onUpdate": "restrict"
         },
         "users_pangkat_golongan_id_pangkat_golongans_id_fk": {
           "name": "users_pangkat_golongan_id_pangkat_golongans_id_fk",
@@ -342,8 +342,8 @@
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onDelete": "restrict",
+          "onUpdate": "restrict"
         }
       },
       "compositePrimaryKeys": {},

@@ -73,7 +73,9 @@ Never store ISO strings or SQLite datetime text, and never mix units in one tabl
 - Any write action that touches more than one statement or table MUST go through a single batch (use `BaseRepository.writeBatch`). Never issue sequential awaited writes that must all succeed together.
 - Single-statement writes are already atomic; do not wrap them in a batch.
 - Reads are never wrapped in a batch/transaction.
-- Foreign keys are enforced. Validate referenced rows in the service before insert/update and return 409 when a referenced row is still in use on delete.
+- Foreign keys are enforced. Every FK MUST declare the referential action explicitly: `.references(() => other.id, { onDelete: "restrict", onUpdate: "restrict" })`. Never rely on the default `no action`.
+- Referential actions only cover hard deletes of the parent row and changes to the referenced key (`id`). They do NOT block updates to other columns, and they do NOT fire for soft deletes. Because deletes in this project are soft and ids never change, the database constraint is a safety net — the service still needs its own guard (e.g. `countLivePegawai`) and must return 409 when a master row is still in use on delete.
+- Validate referenced rows in the service before insert/update. If a query still reaches the database and violates a constraint, `handleError` (`src/shared/errors.ts`) maps D1's `FOREIGN KEY constraint failed` / `SQLITE_CONSTRAINT` to a 409 "Constraint violation" response instead of a 500.
 
 ### Search (FTS5 trigram)
 

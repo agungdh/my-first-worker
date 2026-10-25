@@ -34,8 +34,11 @@ export const users = sqliteTable(
 		status: text("status").notNull(),
 		bidangId: integer("bidang_id")
 			.notNull()
-			.references(() => bidangs.id),
-		pangkatGolonganId: integer("pangkat_golongan_id").references(() => pangkatGolongans.id),
+			.references(() => bidangs.id, { onDelete: "restrict", onUpdate: "restrict" }),
+		pangkatGolonganId: integer("pangkat_golongan_id").references(() => pangkatGolongans.id, {
+			onDelete: "restrict",
+			onUpdate: "restrict",
+		}),
 		jabatan: text("jabatan"),
 		peran: text("peran"),
 		kategoriJabatan: text("kategori_jabatan"),

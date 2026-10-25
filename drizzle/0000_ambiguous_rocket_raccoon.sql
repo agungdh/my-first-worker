@@ -42,8 +42,8 @@ CREATE TABLE `users` (
 	`created_by` integer,
 	`updated_by` integer,
 	`deleted_by` integer,
-	FOREIGN KEY (`bidang_id`) REFERENCES `bidangs`(`id`) ON UPDATE no action ON DELETE no action,
-	FOREIGN KEY (`pangkat_golongan_id`) REFERENCES `pangkat_golongans`(`id`) ON UPDATE no action ON DELETE no action
+	FOREIGN KEY (`bidang_id`) REFERENCES `bidangs`(`id`) ON UPDATE restrict ON DELETE restrict,
+	FOREIGN KEY (`pangkat_golongan_id`) REFERENCES `pangkat_golongans`(`id`) ON UPDATE restrict ON DELETE restrict
 );
 --> statement-breakpoint
 CREATE UNIQUE INDEX `users_nip_unique` ON `users` (lower("nip")) WHERE "users"."deleted_at" IS NULL;--> statement-breakpoint
