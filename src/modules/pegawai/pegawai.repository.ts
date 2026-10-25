@@ -63,26 +63,9 @@ export class PegawaiRepository extends BaseRepository<typeof users> {
 
 	async list(filter: PegawaiFilter): Promise<Page<Pegawai>> {
 		const conditions = [];
-		const sortColumn =
-			filter.sort === "nama" ? users.nama : filter.sort === "nip" ? users.nip : null;
 
 		if (filter.cursor !== undefined) {
-			let sortValue: string | null = null;
-
-			if (sortColumn) {
-				const cursorRow = await this.db
-					.select({ value: sortColumn })
-					.from(users)
-					.where(eq(users.id, filter.cursor))
-					.get();
-
-				if (!cursorRow) return { items: [], nextCursor: null, hasMore: false };
-				sortValue = cursorRow.value;
-			}
-
-			conditions.push(
-				keysetCondition(sortColumn, sortValue, users.id, filter.cursor, filter.order),
-			);
+			conditions.push(keysetCondition(users.id, filter.cursor, filter.order));
 		}
 
 		if (filter.search) {
@@ -104,9 +87,6 @@ export class PegawaiRepository extends BaseRepository<typeof users> {
 		}
 
 		const direction = filter.order === "asc" ? asc : desc;
-		const orderBy = sortColumn
-			? [direction(sortColumn), direction(users.id)]
-			: [direction(users.id)];
 
 		const rows = await this.db
 			.select(selectColumns)
@@ -114,7 +94,7 @@ export class PegawaiRepository extends BaseRepository<typeof users> {
 			.innerJoin(bidangs, eq(bidangs.id, users.bidangId))
 			.leftJoin(pangkatGolongans, eq(pangkatGolongans.id, users.pangkatGolonganId))
 			.where(this.liveWhere(isNull(bidangs.deletedAt), ...conditions))
-			.orderBy(...orderBy)
+			.orderBy(direction(users.id))
 			.limit(PAGE_SIZE + 1);
 
 		return buildPage(rows.map(toPegawai), (pegawai) => pegawai.id);

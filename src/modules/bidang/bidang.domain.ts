@@ -9,10 +9,7 @@ export interface BidangInput {
 	bidang: string;
 }
 
-export type BidangSort = "id" | "bidang";
-
 export interface BidangFilter {
 	cursor?: number;
-	sort: BidangSort;
 	order: SortOrder;
 }

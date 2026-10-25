@@ -12,35 +12,18 @@ export class BidangRepository extends BaseRepository<typeof bidangs> {
 	}
 
 	async list(filter: BidangFilter): Promise<Page<Bidang>> {
-		const sortColumn = filter.sort === "bidang" ? bidangs.bidang : null;
-		let sortValue: string | null = null;
-
-		if (filter.cursor !== undefined && sortColumn) {
-			const cursorRow = await this.db
-				.select({ value: sortColumn })
-				.from(bidangs)
-				.where(eq(bidangs.id, filter.cursor))
-				.get();
-
-			if (!cursorRow) return { items: [], nextCursor: null, hasMore: false };
-			sortValue = cursorRow.value;
-		}
-
 		const conditions =
 			filter.cursor === undefined
 				? []
-				: [keysetCondition(sortColumn, sortValue, bidangs.id, filter.cursor, filter.order)];
+				: [keysetCondition(bidangs.id, filter.cursor, filter.order)];
 
 		const direction = filter.order === "asc" ? asc : desc;
-		const orderBy = sortColumn
-			? [direction(sortColumn), direction(bidangs.id)]
-			: [direction(bidangs.id)];
 
 		const rows = await this.db
 			.select({ id: bidangs.id, bidang: bidangs.bidang })
 			.from(bidangs)
 			.where(this.liveWhere(...conditions))
-			.orderBy(...orderBy)
+			.orderBy(direction(bidangs.id))
 			.limit(PAGE_SIZE + 1);
 
 		return buildPage(rows, (row) => row.id);

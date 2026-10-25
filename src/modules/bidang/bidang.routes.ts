@@ -34,7 +34,6 @@ class BidangList extends OpenAPIRoute {
 		const query = data.query;
 		const page = await c.get("services").bidang.list({
 			cursor: query.cursor,
-			sort: query.sort,
 			order: query.order,
 		});
 

@@ -66,11 +66,8 @@ export interface UpdatePegawaiInput {
 	password?: string;
 }
 
-export type PegawaiSort = "id" | "nama" | "nip";
-
 export interface PegawaiFilter {
 	cursor?: number;
-	sort: PegawaiSort;
 	order: SortOrder;
 	search?: string;
 	role?: Role;

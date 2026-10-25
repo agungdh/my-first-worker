@@ -26,56 +26,24 @@ const columns: PangkatGolonganColumns = {
 	ruang: pangkatGolongans.ruang,
 };
 
-const sortColumns = {
-	jenjang: pangkatGolongans.jenjang,
-	pangkat: pangkatGolongans.pangkat,
-	golongan: pangkatGolongans.golongan,
-	ruang: pangkatGolongans.ruang,
-};
-
 export class PangkatGolonganRepository extends BaseRepository<typeof pangkatGolongans> {
 	constructor(d1: D1Database) {
 		super(d1, pangkatGolongans);
 	}
 
 	async list(filter: PangkatGolonganFilter): Promise<Page<PangkatGolongan>> {
-		const sortColumn = filter.sort === "id" ? null : sortColumns[filter.sort];
-		let sortValue: string | null = null;
-
-		if (filter.cursor !== undefined && sortColumn) {
-			const cursorRow = await this.db
-				.select({ value: sortColumn })
-				.from(pangkatGolongans)
-				.where(eq(pangkatGolongans.id, filter.cursor))
-				.get();
-
-			if (!cursorRow) return { items: [], nextCursor: null, hasMore: false };
-			sortValue = cursorRow.value;
-		}
-
 		const conditions =
 			filter.cursor === undefined
 				? []
-				: [
-						keysetCondition(
-							sortColumn,
-							sortValue,
-							pangkatGolongans.id,
-							filter.cursor,
-							filter.order,
-						),
-					];
+				: [keysetCondition(pangkatGolongans.id, filter.cursor, filter.order)];
 
 		const direction = filter.order === "asc" ? asc : desc;
-		const orderBy = sortColumn
-			? [direction(sortColumn), direction(pangkatGolongans.id)]
-			: [direction(pangkatGolongans.id)];
 
 		const rows = await this.db
 			.select(columns)
 			.from(pangkatGolongans)
 			.where(this.liveWhere(...conditions))
-			.orderBy(...orderBy)
+			.orderBy(direction(pangkatGolongans.id))
 			.limit(PAGE_SIZE + 1);
 
 		return buildPage(rows, (row) => row.id);

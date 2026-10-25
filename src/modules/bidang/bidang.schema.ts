@@ -7,7 +7,6 @@ export const BidangInputSchema = z.strictObject({
 
 export const BidangListQuerySchema = z.object({
 	cursor: CursorSchema.optional().describe("Id of the last item from the previous page"),
-	sort: z.enum(["id", "bidang"]).default("id").describe("Sort column (default id)"),
 	order: SortOrderSchema.describe("Sort direction (default desc)"),
 });
 

@@ -10,10 +10,6 @@ export const PangkatGolonganInputSchema = z.strictObject({
 
 export const PangkatGolonganListQuerySchema = z.object({
 	cursor: CursorSchema.optional().describe("Id of the last item from the previous page"),
-	sort: z
-		.enum(["id", "jenjang", "pangkat", "golongan", "ruang"])
-		.default("id")
-		.describe("Sort column (default id)"),
 	order: SortOrderSchema.describe("Sort direction (default desc)"),
 });
 

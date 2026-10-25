@@ -1,4 +1,4 @@
-import { and, eq, gt, lt, or, type SQL } from "drizzle-orm";
+import { gt, lt, type SQL } from "drizzle-orm";
 import type { SQLiteColumn } from "drizzle-orm/sqlite-core";
 import { z } from "zod";
 import { PAGE_SIZE } from "./config";
@@ -31,24 +31,15 @@ export function buildPage<T>(rows: T[], getId: (row: T) => number): Page<T> {
 }
 
 /**
- * Keyset condition for `(sortColumn, id)` ordered by the same direction.
- * All sortable columns are NOT NULL, so no null ordering is involved.
- * The sort value is resolved from the cursor row by the repository, so callers
- * only ever send the cursor id.
+ * Keyset condition for `id` only. The cursor id is the single anchor of the
+ * pagination; `order` just flips the direction. Never anchor on another column.
  */
 export function keysetCondition(
-	sortColumn: SQLiteColumn | null,
-	sortValue: string | null,
 	idColumn: SQLiteColumn,
 	cursorId: number,
 	order: SortOrder,
 ): SQL {
 	const compare = order === "asc" ? gt : lt;
 
-	if (!sortColumn || sortValue === null) return compare(idColumn, cursorId)!;
-
-	return or(
-		compare(sortColumn, sortValue),
-		and(eq(sortColumn, sortValue), compare(idColumn, cursorId)),
-	)!;
+	return compare(idColumn, cursorId)!;
 }

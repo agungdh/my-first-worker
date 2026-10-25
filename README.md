@@ -45,7 +45,7 @@ Timestamps: audit columns (`created_at`, `updated_at`, `deleted_at`) use epoch m
 
 Search uses an FTS5 trigram index (`pegawai_fts`) and requires at least 3 characters. The FTS DDL lives in `drizzle/0001_pegawai_fts.sql` because drizzle-kit cannot generate virtual tables.
 
-List endpoints use cursor pagination. Send `sort` (default `id`), `order` (default `desc`), and on the next request just `cursor` (the `next_cursor` from the previous page). Responses return `next_cursor` and `has_more`; non-`id` sorts resolve their sort value server-side. Page size is fixed by `PAGE_SIZE` in `src/shared/config.ts`.
+List endpoints use cursor pagination anchored only on `id`. Send `order` (`asc`/`desc`, default `desc`) and, on the next request, just `cursor` (the `next_cursor` from the previous page). Responses return `next_cursor` and `has_more`. There is no `sort` or `cursor_value` param. Page size is fixed by `PAGE_SIZE` in `src/shared/config.ts`.
 
 Login returns the full pegawai record (including `bidang` and `pangkat_golongan`) so the SPA can cache it; the JWT cookie only carries the pegawai id (`sub`), and `requireAuth` reloads the principal from D1 on every authenticated request.
 

@@ -15,10 +15,7 @@ export interface PangkatGolonganInput {
 	ruang: string;
 }
 
-export type PangkatGolonganSort = "id" | "jenjang" | "pangkat" | "golongan" | "ruang";
-
 export interface PangkatGolonganFilter {
 	cursor?: number;
-	sort: PangkatGolonganSort;
 	order: SortOrder;
 }
