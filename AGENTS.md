@@ -113,7 +113,9 @@ Rules:
 - `PUT` is a full replacement with `{ key, filename }`: a different key swaps the file and deletes the old object, the same key only renames.
 - Delete is soft in D1 and hard in R2.
 - Download URLs are presigned GETs valid for 1 hour, regenerated on every list/detail response.
-- `R2_ACCOUNT_ID` and `R2_BUCKET` are vars in `wrangler.jsonc`; `R2_ACCESS_KEY_ID` and `R2_SECRET_ACCESS_KEY` are secrets (`.dev.vars`, `wrangler secret put ...`). The `IMAGES` binding is used for `head`/`delete`.
+- `R2_ACCOUNT_ID` and `R2_BUCKET` are vars in `wrangler.jsonc`; `R2_ACCESS_KEY_ID` and `R2_SECRET_ACCESS_KEY` are secrets (`.dev.vars`, `wrangler secret put ...`).
+- All R2 access goes through the S3 API with those credentials (`aws4fetch`), including `HEAD` and `DELETE`. Do not use the R2 binding for image reads/deletes: presigned URLs always target the real bucket, so a local binding in `wrangler dev` would read a different bucket than the browser uploaded to.
+- Local dev therefore needs real R2 credentials; point `.dev.vars` at a separate bucket with `R2_BUCKET` if dev uploads should not share data with production.
 - Bucket CORS lives in `r2-cors.json` and is applied with `npm run r2:cors`. It must allow the SPA origins for `GET`/`PUT`/`HEAD` with the `Content-Type` header, otherwise browser uploads fail at preflight.
 
 ## Local Explorer (Debugging & Inspection)

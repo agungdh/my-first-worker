@@ -18,7 +18,7 @@ export function buildServices(env: Env): Services {
 		users: new UserService(new UserRepository(env.DB)),
 		images: new ImageService(
 			new ImageRepository(env.DB),
-			new ImageStorage(env.IMAGES, {
+			new ImageStorage({
 				accountId: env.R2_ACCOUNT_ID,
 				bucket: env.R2_BUCKET,
 				accessKeyId: env.R2_ACCESS_KEY_ID,

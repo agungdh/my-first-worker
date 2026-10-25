@@ -20,12 +20,6 @@
 		"R2_ACCOUNT_ID": "d7e260664c63a47664d2f502fb2a0f0b",
 		"R2_BUCKET": "my-first-worker-images"
 	},
-	"r2_buckets": [
-		{
-			"binding": "IMAGES",
-			"bucket_name": "my-first-worker-images"
-		}
-	],
 	"d1_databases": [
 		{
 			"binding": "DB",

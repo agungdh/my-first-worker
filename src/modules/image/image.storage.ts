@@ -15,14 +15,16 @@ export interface R2Config {
 	secretAccessKey: string;
 }
 
+export interface StoredObject {
+	content_type: string | null;
+	size: number;
+}
+
 export class ImageStorage {
 	private readonly endpoint: string;
 	private readonly client: AwsClient | null;
 
-	constructor(
-		private readonly bucket: R2Bucket,
-		config: R2Config,
-	) {
+	constructor(config: R2Config) {
 		this.endpoint = `https://${config.bucket}.${config.accountId}.r2.cloudflarestorage.com`;
 		this.client =
 			config.accessKeyId && config.secretAccessKey
@@ -44,7 +46,7 @@ export class ImageStorage {
 		contentType: ImageContentType,
 		size: number,
 	): Promise<string> {
-		const url = this.objectUrl(key);
+		const url = new URL(this.objectUrl(key));
 		url.searchParams.set("X-Amz-Expires", String(UPLOAD_URL_TTL_SECONDS));
 
 		const signed = await this.signer().sign(url.toString(), {
@@ -57,7 +59,7 @@ export class ImageStorage {
 	}
 
 	async createDownloadUrl(key: string): Promise<string> {
-		const url = this.objectUrl(key);
+		const url = new URL(this.objectUrl(key));
 		url.searchParams.set("X-Amz-Expires", String(DOWNLOAD_URL_TTL_SECONDS));
 
 		const signed = await this.signer().sign(url.toString(), {
@@ -68,12 +70,26 @@ export class ImageStorage {
 		return signed.url.toString();
 	}
 
-	head(key: string): Promise<R2Object | null> {
-		return this.bucket.head(key);
+	async head(key: string): Promise<StoredObject | null> {
+		const response = await this.signer().fetch(this.objectUrl(key), { method: "HEAD" });
+
+		if (response.status === 404) return null;
+		if (!response.ok) {
+			throw new Error(`R2 HEAD failed (HTTP ${response.status})`);
+		}
+
+		return {
+			content_type: response.headers.get("content-type"),
+			size: Number(response.headers.get("content-length") ?? 0),
+		};
 	}
 
 	async remove(key: string): Promise<void> {
-		await this.bucket.delete(key);
+		const response = await this.signer().fetch(this.objectUrl(key), { method: "DELETE" });
+
+		if (!response.ok && response.status !== 404) {
+			throw new Error(`R2 DELETE failed (HTTP ${response.status})`);
+		}
 	}
 
 	static contentTypeFromKey(key: string): ImageContentType {
@@ -83,8 +99,8 @@ export class ImageStorage {
 		);
 	}
 
-	private objectUrl(key: string): URL {
-		return new URL(`${this.endpoint}/${key}`);
+	private objectUrl(key: string): string {
+		return `${this.endpoint}/${key}`;
 	}
 
 	private signer(): AwsClient {

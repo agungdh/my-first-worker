@@ -99,7 +99,7 @@ export class ImageService {
 
 		return {
 			content_type:
-				object.httpMetadata?.contentType ?? ImageStorage.contentTypeFromKey(key),
+				object.content_type ?? ImageStorage.contentTypeFromKey(key),
 			size: object.size,
 		};
 	}
