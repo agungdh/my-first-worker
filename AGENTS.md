@@ -68,6 +68,26 @@ Rules:
 - Unique constraints MUST be partial unique indexes scoped to live rows and case-insensitive: `uniqueIndex("...").on(sql`lower(${table.column})`).where(sql`${table.deletedAt} IS NULL`)`. Never use `.unique()` on a column, otherwise a soft-deleted row keeps blocking reuse of that value.
 - Queries that filter by a unique text column (get, update, delete target) MUST compare with `lower(column)` too (e.g. `eq(sql`lower(${table.slug})`, value.toLowerCase())`). Otherwise a row stored with different casing won't match the uniqueness semantics of the index.
 
+## Authentication
+
+Credentials live on the `users` table (`username`, `name`, `password_hash`). Auth endpoints are in `src/modules/user/user.routes.ts`:
+
+| Endpoint | Purpose |
+|----------|---------|
+| `POST /api/auth/register` | Create a user, hash the password, and set the auth cookie |
+| `POST /api/auth/login` | Verify credentials and set the auth cookie |
+| `POST /api/auth/logout` | Clear the auth cookie |
+| `GET /api/auth/me` | Return the user referenced by the auth cookie |
+
+Rules:
+
+- Passwords are hashed with PBKDF2-SHA256 (100k iterations, random salt) via `src/modules/user/user.password.ts`. The stored format is `pbkdf2_sha256$<iterations>$<salt>$<hash>` so the iteration count can be raised later.
+- `password_hash` is internal only. It never appears in domain types, Zod/OpenAPI schemas, or API responses.
+- Usernames are unique case-insensitively (partial unique index on `lower(username)` where `deleted_at IS NULL`) and all lookups compare with `lower(username)`.
+- JWT helpers (`src/shared/auth.ts`) sign HS256 tokens with `JWT_SECRET` and a 7 day expiry, stored in an `HttpOnly`, `Secure`, `SameSite=Lax` cookie named `access_token`. Read the identity from that cookie instead of accepting tokens from headers.
+- `JWT_SECRET` is an environment secret. Set it locally in `.dev.vars` and remotely with `wrangler secret put JWT_SECRET`. Never commit the real value.
+- Chanfana drops headers set via `c.header()` when `handle()` returns a plain object. Any route that sets or clears a cookie MUST return `c.json(...)` so the `Set-Cookie` header survives.
+
 ## Local Explorer (Debugging & Inspection)
 
 When running `npx wrangler dev`, a Local Explorer API is available for inspecting and debugging local Workers, bindings, and storage state. The API base URL is printed in the terminal when the dev server starts.
