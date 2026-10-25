@@ -1,6 +1,7 @@
-import { eq } from "drizzle-orm";
+import { and, eq, isNull } from "drizzle-orm";
 import { createDb } from "../db";
 import { tasks } from "../db/schema";
+import { auditCreate, auditDelete, auditUpdate } from "../db/audit";
 import type { Task, CreateTaskInput, UpdateTaskInput } from "../domain/task";
 
 export class TaskRepository {
@@ -12,30 +13,28 @@ export class TaskRepository {
 
 	async list(page: number, isCompleted?: boolean): Promise<Task[]> {
 		const pageSize = 20;
-		let query = this.db.select().from(tasks);
+		const conditions = [isNull(tasks.deletedAt)];
 		if (isCompleted !== undefined) {
-			query = query.where(eq(tasks.completed, isCompleted)) as typeof query;
+			conditions.push(eq(tasks.completed, isCompleted));
 		}
-		const rows = await query.limit(pageSize).offset(page * pageSize).all();
-		return rows.map((row) => ({
-			name: row.name,
-			slug: row.slug,
-			description: row.description ?? undefined,
-			completed: row.completed,
-			due_date: row.dueDate,
-		}));
+		const rows = await this.db
+			.select()
+			.from(tasks)
+			.where(and(...conditions))
+			.limit(pageSize)
+			.offset(page * pageSize)
+			.all();
+		return rows.map((row) => this.toTask(row));
 	}
 
 	async getBySlug(slug: string): Promise<Task | null> {
-		const row = await this.db.select().from(tasks).where(eq(tasks.slug, slug)).get();
+		const row = await this.db
+			.select()
+			.from(tasks)
+			.where(and(eq(tasks.slug, slug), isNull(tasks.deletedAt)))
+			.get();
 		if (!row) return null;
-		return {
-			name: row.name,
-			slug: row.slug,
-			description: row.description ?? undefined,
-			completed: row.completed,
-			due_date: row.dueDate,
-		};
+		return this.toTask(row);
 	}
 
 	async create(input: CreateTaskInput): Promise<Task> {
@@ -47,18 +46,13 @@ export class TaskRepository {
 				description: input.description,
 				completed: input.completed,
 				dueDate: input.due_date,
+				...auditCreate(),
 			})
 			.returning();
 
 		if (!created) throw new Error("Failed to create task");
 
-		return {
-			name: created.name,
-			slug: created.slug,
-			description: created.description ?? undefined,
-			completed: created.completed,
-			due_date: created.dueDate,
-		};
+		return this.toTask(created);
 	}
 
 	async update(slug: string, input: UpdateTaskInput): Promise<Task | null> {
@@ -71,23 +65,31 @@ export class TaskRepository {
 
 		const [updated] = await this.db
 			.update(tasks)
-			.set(setValues)
-			.where(eq(tasks.slug, slug))
+			.set({ ...setValues, ...auditUpdate() })
+			.where(and(eq(tasks.slug, slug), isNull(tasks.deletedAt)))
 			.returning();
 
 		if (!updated) return null;
 
-		return {
-			name: updated.name,
-			slug: updated.slug,
-			description: updated.description ?? undefined,
-			completed: updated.completed,
-			due_date: updated.dueDate,
-		};
+		return this.toTask(updated);
 	}
 
 	async delete(slug: string): Promise<boolean> {
-		const [deleted] = await this.db.delete(tasks).where(eq(tasks.slug, slug)).returning();
+		const [deleted] = await this.db
+			.update(tasks)
+			.set(auditDelete())
+			.where(and(eq(tasks.slug, slug), isNull(tasks.deletedAt)))
+			.returning();
 		return !!deleted;
+	}
+
+	private toTask(row: typeof tasks.$inferSelect): Task {
+		return {
+			name: row.name,
+			slug: row.slug,
+			description: row.description ?? undefined,
+			completed: row.completed,
+			due_date: row.dueDate,
+		};
 	}
 }

@@ -19,6 +19,39 @@ For all limits and quotas, retrieve from the product's `/platform/limits/` page.
 
 Run `wrangler types` after changing bindings in wrangler.jsonc.
 
+## Database (D1 + Drizzle)
+
+Schema lives in `src/db/schema.ts`, migrations in `drizzle/`.
+
+| Command | Purpose |
+|---------|---------|
+| `npx drizzle-kit generate` | Generate a migration after schema changes |
+| `npx wrangler d1 migrations apply my-first-worker-db --local` | Apply migrations locally |
+| `npx wrangler d1 migrations apply my-first-worker-db --remote` | Apply migrations remotely |
+
+Migrations are applied manually, not as part of `wrangler deploy`.
+
+### Audit columns
+
+Every table MUST include the shared audit columns by spreading `...auditColumns` from `src/db/audit.ts`:
+
+| Column | Type | Meaning |
+|--------|------|---------|
+| `created_at` | integer NULL | epoch milliseconds |
+| `updated_at` | integer NULL | epoch milliseconds |
+| `deleted_at` | integer NULL | epoch milliseconds; soft-delete marker |
+| `created_by` | integer NULL | user id |
+| `updated_by` | integer NULL | user id |
+| `deleted_by` | integer NULL | user id |
+
+Rules:
+
+- All audit columns are nullable and have no database default. Values are written pre-persist by the application through `auditCreate()` / `auditUpdate()` / `auditDelete()`.
+- Timestamps are epoch milliseconds (`Date.now()`), never ISO strings or SQLite datetime text.
+- `*_by` are nullable integers, the same type as the user id. There is no auth yet, so they are written as `null`, but always go through the audit helpers so a real actor can be wired in one place later.
+- Audit columns are internal only. Never add them to domain types (`src/domain/*`), Zod/OpenAPI schemas (`src/types.ts`), endpoint payloads, or API responses. Repositories map DB rows to domain objects and must drop audit fields.
+- Deletes are soft: set `deleted_at` / `deleted_by` instead of removing rows, and every read (list, get, update target) MUST filter with `isNull(table.deletedAt)`.
+
 ## Local Explorer (Debugging & Inspection)
 
 When running `npx wrangler dev`, a Local Explorer API is available for inspecting and debugging local Workers, bindings, and storage state. The API base URL is printed in the terminal when the dev server starts.
