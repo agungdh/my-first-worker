@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { IdSchema, SortSchema } from "../../shared/pagination";
+import { IdSchema, SortOrderSchema } from "../../shared/pagination";
 
 export const BidangInputSchema = z.strictObject({
 	bidang: z.string().trim().min(1).max(255),
@@ -7,7 +7,8 @@ export const BidangInputSchema = z.strictObject({
 
 export const BidangListQuerySchema = z.object({
 	id: IdSchema.optional().describe("Id of the last item from the previous page"),
-	sort: SortSchema.describe("Sort direction: asc or desc (default desc)"),
+	sort: z.enum(["id", "bidang"]).default("id").describe("Sort column (default id)"),
+	order: SortOrderSchema.describe("Sort direction (default desc)"),
 });
 
 export const BidangSchema = z.object({

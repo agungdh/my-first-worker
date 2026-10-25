@@ -1,9 +1,9 @@
-import { gt, lt, type SQL } from "drizzle-orm";
+import { and, eq, gt, lt, or, type SQL } from "drizzle-orm";
 import type { SQLiteColumn } from "drizzle-orm/sqlite-core";
 import { z } from "zod";
 import { PAGE_SIZE } from "./config";
 
-export type Sort = "asc" | "desc";
+export type SortOrder = "asc" | "desc";
 
 export interface Page<T> {
 	items: T[];
@@ -12,7 +12,7 @@ export interface Page<T> {
 }
 
 export const IdSchema = z.number().int().positive();
-export const SortSchema = z.enum(["asc", "desc"]).default("desc");
+export const SortOrderSchema = z.enum(["asc", "desc"]).default("desc");
 
 /**
  * Keyset pagination always fetches one extra row to know whether another
@@ -31,11 +31,24 @@ export function buildPage<T>(rows: T[], getId: (row: T) => number): Page<T> {
 }
 
 /**
- * Keyset condition for `id` only. The `id` query param is the single anchor of
- * the pagination; `sort` just flips the direction (default `desc`).
+ * Keyset condition for `(sortColumn, id)` ordered in the same direction.
+ * The client only sends the `id` of the last item; when `sort` is not `id`,
+ * the repository resolves that row's sort value itself, so there is no
+ * `cursor_value` param. All sortable columns are NOT NULL.
  */
-export function keysetCondition(idColumn: SQLiteColumn, lastId: number, sort: Sort): SQL {
-	const compare = sort === "asc" ? gt : lt;
+export function keysetCondition(
+	sortColumn: SQLiteColumn | null,
+	sortValue: string | null,
+	idColumn: SQLiteColumn,
+	lastId: number,
+	order: SortOrder,
+): SQL {
+	const compare = order === "asc" ? gt : lt;
 
-	return compare(idColumn, lastId)!;
+	if (!sortColumn || sortValue === null) return compare(idColumn, lastId)!;
+
+	return or(
+		compare(sortColumn, sortValue),
+		and(eq(sortColumn, sortValue), compare(idColumn, lastId)),
+	)!;
 }

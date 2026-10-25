@@ -1,8 +1,5 @@
 import { z } from "zod";
-import {
-	IdSchema,
-	SortSchema,
-} from "../../shared/pagination";
+import { IdSchema, SortOrderSchema } from "../../shared/pagination";
 import {
 	KATEGORI_JABATAN,
 	KATEGORI_KEBUTUHAN_JAM_PELATIHAN,
@@ -53,7 +50,8 @@ export const PegawaiUpdateSchema = z.strictObject({
 
 export const PegawaiListQuerySchema = z.object({
 	id: IdSchema.optional().describe("Id of the last item from the previous page"),
-	sort: SortSchema.describe("Sort direction: asc or desc (default desc)"),
+	sort: z.enum(["id", "nama", "nip"]).default("id").describe("Sort column (default id)"),
+	order: SortOrderSchema.describe("Sort direction (default desc)"),
 	search: z
 		.string()
 		.trim()

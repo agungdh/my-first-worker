@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { IdSchema, SortSchema } from "../../shared/pagination";
+import { IdSchema, SortOrderSchema } from "../../shared/pagination";
 
 export const PangkatGolonganInputSchema = z.strictObject({
 	jenjang: z.string().trim().min(1).max(100),
@@ -10,7 +10,11 @@ export const PangkatGolonganInputSchema = z.strictObject({
 
 export const PangkatGolonganListQuerySchema = z.object({
 	id: IdSchema.optional().describe("Id of the last item from the previous page"),
-	sort: SortSchema.describe("Sort direction: asc or desc (default desc)"),
+	sort: z
+		.enum(["id", "jenjang", "pangkat", "golongan", "ruang"])
+		.default("id")
+		.describe("Sort column (default id)"),
+	order: SortOrderSchema.describe("Sort direction (default desc)"),
 });
 
 export const PangkatGolonganSchema = z.object({

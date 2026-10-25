@@ -63,9 +63,25 @@ export class PegawaiRepository extends BaseRepository<typeof users> {
 
 	async list(filter: PegawaiFilter): Promise<Page<Pegawai>> {
 		const conditions = [];
+		const sortColumn =
+			filter.sort === "nama" ? users.nama : filter.sort === "nip" ? users.nip : null;
+		let sortValue: string | null = null;
 
 		if (filter.id !== undefined) {
-			conditions.push(keysetCondition(users.id, filter.id, filter.sort));
+			if (sortColumn) {
+				const last = await this.db
+					.select({ value: sortColumn })
+					.from(users)
+					.where(eq(users.id, filter.id))
+					.get();
+
+				if (!last) return { items: [], nextId: null, hasMore: false };
+				sortValue = last.value;
+			}
+
+			conditions.push(
+				keysetCondition(sortColumn, sortValue, users.id, filter.id, filter.order),
+			);
 		}
 
 		if (filter.search) {
@@ -86,7 +102,10 @@ export class PegawaiRepository extends BaseRepository<typeof users> {
 			);
 		}
 
-		const direction = filter.sort === "asc" ? asc : desc;
+		const direction = filter.order === "asc" ? asc : desc;
+		const orderBy = sortColumn
+			? [direction(sortColumn), direction(users.id)]
+			: [direction(users.id)];
 
 		const rows = await this.db
 			.select(selectColumns)
@@ -94,7 +113,7 @@ export class PegawaiRepository extends BaseRepository<typeof users> {
 			.innerJoin(bidangs, eq(bidangs.id, users.bidangId))
 			.leftJoin(pangkatGolongans, eq(pangkatGolongans.id, users.pangkatGolonganId))
 			.where(this.liveWhere(isNull(bidangs.deletedAt), ...conditions))
-			.orderBy(direction(users.id))
+			.orderBy(...orderBy)
 			.limit(PAGE_SIZE + 1);
 
 		return buildPage(rows.map(toPegawai), (pegawai) => pegawai.id);
