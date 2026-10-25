@@ -1,26 +1,24 @@
-import { and, eq, isNull, sql } from "drizzle-orm";
-import { createDb } from "../db";
+import { eq, sql } from "drizzle-orm";
+import { BaseRepository } from "./baseRepository";
 import { tasks } from "../db/schema";
 import { auditCreate, auditDelete, auditUpdate } from "../db/audit";
 import type { Task, CreateTaskInput, UpdateTaskInput } from "../domain/task";
 
-export class TaskRepository {
-	private db: ReturnType<typeof createDb>;
-
+export class TaskRepository extends BaseRepository<typeof tasks> {
 	constructor(d1: D1Database) {
-		this.db = createDb(d1);
+		super(d1, tasks);
 	}
 
 	async list(page: number, isCompleted?: boolean): Promise<Task[]> {
 		const pageSize = 20;
-		const conditions = [isNull(tasks.deletedAt)];
+		const conditions = [];
 		if (isCompleted !== undefined) {
 			conditions.push(eq(tasks.completed, isCompleted));
 		}
 		const rows = await this.db
 			.select()
 			.from(tasks)
-			.where(and(...conditions))
+			.where(this.liveWhere(...conditions))
 			.limit(pageSize)
 			.offset(page * pageSize)
 			.all();
@@ -84,10 +82,7 @@ export class TaskRepository {
 	}
 
 	private liveSlugWhere(slug: string) {
-		return and(
-			eq(sql`lower(${tasks.slug})`, slug.toLowerCase()),
-			isNull(tasks.deletedAt),
-		);
+		return this.liveWhere(eq(sql`lower(${tasks.slug})`, slug.toLowerCase()));
 	}
 
 	private toTask(row: typeof tasks.$inferSelect): Task {
