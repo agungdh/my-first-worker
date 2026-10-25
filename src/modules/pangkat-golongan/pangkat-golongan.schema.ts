@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { CursorSchema, SortOrderSchema } from "../../shared/pagination";
+import { IdSchema, SortSchema } from "../../shared/pagination";
 
 export const PangkatGolonganInputSchema = z.strictObject({
 	jenjang: z.string().trim().min(1).max(100),
@@ -9,8 +9,8 @@ export const PangkatGolonganInputSchema = z.strictObject({
 });
 
 export const PangkatGolonganListQuerySchema = z.object({
-	cursor: CursorSchema.optional().describe("Id of the last item from the previous page"),
-	order: SortOrderSchema.describe("Sort direction (default desc)"),
+	id: IdSchema.optional().describe("Id of the last item from the previous page"),
+	sort: SortSchema.describe("Sort direction: asc or desc (default desc)"),
 });
 
 export const PangkatGolonganSchema = z.object({
@@ -24,6 +24,6 @@ export const PangkatGolonganSchema = z.object({
 export const PangkatGolonganListSchema = z.object({
 	success: z.boolean(),
 	pangkat_golongan: PangkatGolonganSchema.array(),
-	next_cursor: z.number().nullable(),
+	next_id: z.number().nullable(),
 	has_more: z.boolean(),
 });

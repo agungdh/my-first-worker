@@ -1,4 +1,4 @@
-import type { SortOrder } from "../../shared/pagination";
+import type { Sort } from "../../shared/pagination";
 
 export interface PangkatGolongan {
 	id: number;
@@ -16,6 +16,6 @@ export interface PangkatGolonganInput {
 }
 
 export interface PangkatGolonganFilter {
-	cursor?: number;
-	order: SortOrder;
+	id?: number;
+	sort: Sort;
 }

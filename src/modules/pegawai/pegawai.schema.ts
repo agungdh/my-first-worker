@@ -1,7 +1,7 @@
 import { z } from "zod";
 import {
-	CursorSchema,
-	SortOrderSchema,
+	IdSchema,
+	SortSchema,
 } from "../../shared/pagination";
 import {
 	KATEGORI_JABATAN,
@@ -52,8 +52,8 @@ export const PegawaiUpdateSchema = z.strictObject({
 });
 
 export const PegawaiListQuerySchema = z.object({
-	cursor: CursorSchema.optional().describe("Id of the last item from the previous page"),
-	order: SortOrderSchema.describe("Sort direction (default desc)"),
+	id: IdSchema.optional().describe("Id of the last item from the previous page"),
+	sort: SortSchema.describe("Sort direction: asc or desc (default desc)"),
 	search: z
 		.string()
 		.trim()
@@ -98,6 +98,6 @@ export const PegawaiSchema = z.object({
 export const PegawaiListSchema = z.object({
 	success: z.boolean(),
 	pegawai: PegawaiSchema.array(),
-	next_cursor: z.number().nullable(),
+	next_id: z.number().nullable(),
 	has_more: z.boolean(),
 });

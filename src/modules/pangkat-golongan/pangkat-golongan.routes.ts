@@ -33,13 +33,13 @@ class PangkatGolonganList extends OpenAPIRoute {
 
 		const query = data.query;
 		const page = await c.get("services").pangkatGolongan.list({
-			cursor: query.cursor,
-			order: query.order,
+			id: query.id,
+			sort: query.sort,
 		});
 
 		return success({
 			pangkat_golongan: page.items,
-			next_cursor: page.nextCursor,
+			next_id: page.nextId,
 			has_more: page.hasMore,
 		});
 	}

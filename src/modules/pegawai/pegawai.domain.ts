@@ -1,4 +1,4 @@
-import type { SortOrder } from "../../shared/pagination";
+import type { Sort } from "../../shared/pagination";
 import type { Role, Status, KategoriJabatan, KategoriKebutuhanJamPelatihan } from "./pegawai.constants";
 
 export interface BidangRef {
@@ -67,8 +67,8 @@ export interface UpdatePegawaiInput {
 }
 
 export interface PegawaiFilter {
-	cursor?: number;
-	order: SortOrder;
+	id?: number;
+	sort: Sort;
 	search?: string;
 	role?: Role;
 	status?: Status;

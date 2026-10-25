@@ -1,4 +1,4 @@
-import type { SortOrder } from "../../shared/pagination";
+import type { Sort } from "../../shared/pagination";
 
 export interface Bidang {
 	id: number;
@@ -10,6 +10,6 @@ export interface BidangInput {
 }
 
 export interface BidangFilter {
-	cursor?: number;
-	order: SortOrder;
+	id?: number;
+	sort: Sort;
 }

@@ -33,11 +33,11 @@ export class PangkatGolonganRepository extends BaseRepository<typeof pangkatGolo
 
 	async list(filter: PangkatGolonganFilter): Promise<Page<PangkatGolongan>> {
 		const conditions =
-			filter.cursor === undefined
+			filter.id === undefined
 				? []
-				: [keysetCondition(pangkatGolongans.id, filter.cursor, filter.order)];
+				: [keysetCondition(pangkatGolongans.id, filter.id, filter.sort)];
 
-		const direction = filter.order === "asc" ? asc : desc;
+		const direction = filter.sort === "asc" ? asc : desc;
 
 		const rows = await this.db
 			.select(columns)

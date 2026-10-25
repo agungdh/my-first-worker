@@ -1,13 +1,13 @@
 import { z } from "zod";
-import { CursorSchema, SortOrderSchema } from "../../shared/pagination";
+import { IdSchema, SortSchema } from "../../shared/pagination";
 
 export const BidangInputSchema = z.strictObject({
 	bidang: z.string().trim().min(1).max(255),
 });
 
 export const BidangListQuerySchema = z.object({
-	cursor: CursorSchema.optional().describe("Id of the last item from the previous page"),
-	order: SortOrderSchema.describe("Sort direction (default desc)"),
+	id: IdSchema.optional().describe("Id of the last item from the previous page"),
+	sort: SortSchema.describe("Sort direction: asc or desc (default desc)"),
 });
 
 export const BidangSchema = z.object({
@@ -18,6 +18,6 @@ export const BidangSchema = z.object({
 export const BidangListSchema = z.object({
 	success: z.boolean(),
 	bidang: BidangSchema.array(),
-	next_cursor: z.number().nullable(),
+	next_id: z.number().nullable(),
 	has_more: z.boolean(),
 });

@@ -64,8 +64,8 @@ export class PegawaiRepository extends BaseRepository<typeof users> {
 	async list(filter: PegawaiFilter): Promise<Page<Pegawai>> {
 		const conditions = [];
 
-		if (filter.cursor !== undefined) {
-			conditions.push(keysetCondition(users.id, filter.cursor, filter.order));
+		if (filter.id !== undefined) {
+			conditions.push(keysetCondition(users.id, filter.id, filter.sort));
 		}
 
 		if (filter.search) {
@@ -86,7 +86,7 @@ export class PegawaiRepository extends BaseRepository<typeof users> {
 			);
 		}
 
-		const direction = filter.order === "asc" ? asc : desc;
+		const direction = filter.sort === "asc" ? asc : desc;
 
 		const rows = await this.db
 			.select(selectColumns)

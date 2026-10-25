@@ -13,11 +13,11 @@ export class BidangRepository extends BaseRepository<typeof bidangs> {
 
 	async list(filter: BidangFilter): Promise<Page<Bidang>> {
 		const conditions =
-			filter.cursor === undefined
+			filter.id === undefined
 				? []
-				: [keysetCondition(bidangs.id, filter.cursor, filter.order)];
+				: [keysetCondition(bidangs.id, filter.id, filter.sort)];
 
-		const direction = filter.order === "asc" ? asc : desc;
+		const direction = filter.sort === "asc" ? asc : desc;
 
 		const rows = await this.db
 			.select({ id: bidangs.id, bidang: bidangs.bidang })

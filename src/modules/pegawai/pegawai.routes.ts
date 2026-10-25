@@ -97,8 +97,8 @@ class PegawaiList extends OpenAPIRoute {
 		const query = data.query;
 
 		const page = await c.get("services").pegawai.list({
-			cursor: query.cursor,
-			order: query.order,
+			id: query.id,
+			sort: query.sort,
 			search: query.search,
 			role: query.role,
 			status: query.status,
@@ -110,7 +110,7 @@ class PegawaiList extends OpenAPIRoute {
 
 		return success({
 			pegawai: page.items.map(toPegawaiResponse),
-			next_cursor: page.nextCursor,
+			next_id: page.nextId,
 			has_more: page.hasMore,
 		});
 	}

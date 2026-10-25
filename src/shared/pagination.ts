@@ -3,19 +3,19 @@ import type { SQLiteColumn } from "drizzle-orm/sqlite-core";
 import { z } from "zod";
 import { PAGE_SIZE } from "./config";
 
-export type SortOrder = "asc" | "desc";
+export type Sort = "asc" | "desc";
 
 export interface Page<T> {
 	items: T[];
-	nextCursor: number | null;
+	nextId: number | null;
 	hasMore: boolean;
 }
 
-export const CursorSchema = z.number().int().positive();
-export const SortOrderSchema = z.enum(["asc", "desc"]).default("desc");
+export const IdSchema = z.number().int().positive();
+export const SortSchema = z.enum(["asc", "desc"]).default("desc");
 
 /**
- * Cursor pagination always fetches one extra row to know whether another
+ * Keyset pagination always fetches one extra row to know whether another
  * page exists without running a count query.
  */
 export function buildPage<T>(rows: T[], getId: (row: T) => number): Page<T> {
@@ -26,20 +26,16 @@ export function buildPage<T>(rows: T[], getId: (row: T) => number): Page<T> {
 	return {
 		items,
 		hasMore,
-		nextCursor: hasMore && last ? getId(last) : null,
+		nextId: hasMore && last ? getId(last) : null,
 	};
 }
 
 /**
- * Keyset condition for `id` only. The cursor id is the single anchor of the
- * pagination; `order` just flips the direction. Never anchor on another column.
+ * Keyset condition for `id` only. The `id` query param is the single anchor of
+ * the pagination; `sort` just flips the direction (default `desc`).
  */
-export function keysetCondition(
-	idColumn: SQLiteColumn,
-	cursorId: number,
-	order: SortOrder,
-): SQL {
-	const compare = order === "asc" ? gt : lt;
+export function keysetCondition(idColumn: SQLiteColumn, lastId: number, sort: Sort): SQL {
+	const compare = sort === "asc" ? gt : lt;
 
-	return compare(idColumn, cursorId)!;
+	return compare(idColumn, lastId)!;
 }
