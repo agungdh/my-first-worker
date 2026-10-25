@@ -42,6 +42,18 @@ app.use("*", async (c, next) => {
 	await next();
 });
 
+const DOCS_PATHS = new Set(["/", "/redocs", "/openapi.json", "/openapi.yaml"]);
+
+// Docs (Swagger UI, ReDoc, OpenAPI schema) are a development-only feature.
+// In production those paths answer a lightweight health check instead.
+app.use("*", async (c, next) => {
+	if (c.env.ENVIRONMENT !== "development" && DOCS_PATHS.has(c.req.path)) {
+		return c.json({ success: true }, 200);
+	}
+
+	await next();
+});
+
 app.use("*", requireAuth);
 
 app.onError(handleError);

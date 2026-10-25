@@ -12,6 +12,9 @@
 	},
 	"upload_source_maps": true,
 	"vars": {
+		// Deployed worker runs in production, so API docs stay disabled.
+		// Local development overrides this with ENVIRONMENT=development in .dev.vars.
+		"ENVIRONMENT": "production",
 		// Production SPA origins allowed to call this API with credentials.
 		// Comma-separated; local development origins live in .dev.vars instead.
 		"CORS_ORIGINS": "https://rakawik.my.id",

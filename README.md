@@ -12,6 +12,8 @@ Cloudflare Worker API built with [Hono](https://hono.dev/docs) and [chanfana](ht
 6. `npx wrangler dev` — docs at `http://localhost:8787/`
 7. `npx wrangler deploy` to publish
 
+API docs (Swagger UI at `/`, ReDoc at `/redocs`, schema at `/openapi.json` and `/openapi.yaml`) are development-only. They are served when `ENVIRONMENT=development` (set in `.dev.vars`); on the deployed worker `ENVIRONMENT=production` makes those paths answer `{ "success": true }` for use as a health check.
+
 The seeded admin NIP defaults to `198001012000011001` with the NIP as its password. Override with `ADMIN_NIP`, `ADMIN_NAMA`, and `ADMIN_PASSWORD` when running the seed script.
 
 ## Project structure

@@ -1,3 +1,6 @@
+# Enables the API docs (Swagger UI, ReDoc, OpenAPI schema) on http://localhost:8787/.
+# Production overrides this with ENVIRONMENT=production in wrangler.jsonc.
+ENVIRONMENT=development
 JWT_SECRET=replace-with-a-random-64-char-hex-string
 CORS_ORIGINS=http://localhost:4200,http://127.0.0.1:4200
 R2_ACCOUNT_ID=d7e260664c63a47664d2f502fb2a0f0b
