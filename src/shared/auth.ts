@@ -33,15 +33,11 @@ export async function signAuthToken(secret: string, user: User): Promise<string>
 export async function verifyAuthToken(secret: string, token: string): Promise<User | null> {
 	try {
 		const payload = await verify(token, secret, "HS256");
-		if (
-			typeof payload.sub !== "number" ||
-			typeof payload.username !== "string" ||
-			typeof payload.name !== "string"
-		) {
-			return null;
-		}
-
-		return { id: payload.sub, username: payload.username, name: payload.name };
+		return {
+			id: payload.sub as number,
+			username: payload.username as string,
+			name: payload.name as string,
+		};
 	} catch {
 		return null;
 	}
