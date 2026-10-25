@@ -26,9 +26,7 @@ export class UserService {
 		return { id: record.id, username: record.username, name: record.name };
 	}
 
-	async get(id: number): Promise<User> {
-		const user = await this.repo.findById(id);
-		if (!user) throw new UnauthorizedException();
-		return user;
+	async find(id: number): Promise<User | null> {
+		return this.repo.findById(id);
 	}
 }

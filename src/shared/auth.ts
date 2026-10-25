@@ -1,6 +1,7 @@
 import { deleteCookie, getCookie, setCookie } from "hono/cookie";
+import type { MiddlewareHandler } from "hono";
 import { sign, verify } from "hono/jwt";
-import type { AppContext } from "./types";
+import type { AppContext, AppEnv } from "./types";
 
 export const AUTH_COOKIE = "access_token";
 export const AUTH_TOKEN_TTL_SECONDS = 60 * 60 * 24 * 7;
@@ -52,4 +53,21 @@ export function clearAuthCookie(c: AppContext): void {
 
 export function getAuthToken(c: AppContext): string | undefined {
 	return getCookie(c, AUTH_COOKIE);
+}
+
+export const requireAuth: MiddlewareHandler<AppEnv> = async (c, next) => {
+	const token = getAuthToken(c);
+
+	const payload = token ? await verifyAuthToken(c.env.JWT_SECRET, token) : null;
+	if (!payload) return unauthorized(c);
+
+	const user = await c.get("services").users.find(payload.id);
+	if (!user) return unauthorized(c);
+
+	c.set("user", user);
+	await next();
+};
+
+function unauthorized(c: AppContext) {
+	return c.json({ success: false, errors: [{ code: 7003, message: "Unauthorized" }] }, 401);
 }

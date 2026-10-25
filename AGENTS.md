@@ -86,6 +86,8 @@ Rules:
 - Usernames are unique case-insensitively (partial unique index on `lower(username)` where `deleted_at IS NULL`) and all lookups compare with `lower(username)`.
 - JWT helpers (`src/shared/auth.ts`) sign HS256 tokens with `JWT_SECRET` and a 7 day expiry, stored in an `HttpOnly`, `Secure`, `SameSite=Lax` cookie named `access_token`. Read the identity from that cookie instead of accepting tokens from headers.
 - `JWT_SECRET` is an environment secret. Set it locally in `.dev.vars` and remotely with `wrangler secret put JWT_SECRET`. Never commit the real value.
+- Protected routes are wired in `src/index.ts` with `app.use("<prefix>/*", requireAuth)`. The guard (`src/shared/auth.ts`) verifies the cookie, loads the live user, sets `c.get("user")`, and returns 401 otherwise. Route handlers read the identity from that context variable. Register every new protected prefix there.
+- The guard returns a 401 JSON response directly instead of throwing chanfana's `UnauthorizedException`: `ApiException` is not a Hono `HTTPException`, so in middleware it would surface as a 500 through `app.onError`.
 - Chanfana drops headers set via `c.header()` when `handle()` returns a plain object. Any route that sets or clears a cookie MUST return `c.json(...)` so the `Set-Cookie` header survives.
 
 ## Local Explorer (Debugging & Inspection)

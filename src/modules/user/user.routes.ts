@@ -4,10 +4,8 @@ import { type AppContext } from "../../shared/types";
 import { success } from "../../shared/http";
 import {
 	clearAuthCookie,
-	getAuthToken,
 	setAuthCookie,
 	signAuthToken,
-	verifyAuthToken,
 } from "../../shared/auth";
 import { UserLoginSchema, UserRegisterSchema, UserSchema } from "./user.schema";
 
@@ -138,13 +136,8 @@ class UserMe extends OpenAPIRoute {
 	};
 
 	async handle(c: AppContext) {
-		const token = getAuthToken(c);
-		if (!token) throw new UnauthorizedException();
-
-		const payload = await verifyAuthToken(c.env.JWT_SECRET, token);
-		if (!payload) throw new UnauthorizedException();
-
-		const user = await c.get("services").users.get(payload.id);
+		const user = c.get("user");
+		if (!user) throw new UnauthorizedException();
 
 		return success({ user });
 	}
