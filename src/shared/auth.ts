@@ -55,7 +55,19 @@ export function getAuthToken(c: AppContext): string | undefined {
 	return getCookie(c, AUTH_COOKIE);
 }
 
+const publicRoutes = new Set([
+	"POST /api/auth/register",
+	"POST /api/auth/login",
+	"POST /api/auth/logout",
+	"GET /",
+	"GET /redocs",
+	"GET /openapi.json",
+	"GET /openapi.yaml",
+]);
+
 export const requireAuth: MiddlewareHandler<AppEnv> = async (c, next) => {
+	if (publicRoutes.has(`${c.req.method} ${c.req.path}`)) return next();
+
 	const token = getAuthToken(c);
 
 	const payload = token ? await verifyAuthToken(c.env.JWT_SECRET, token) : null;

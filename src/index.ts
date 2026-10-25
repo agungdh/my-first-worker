@@ -13,8 +13,7 @@ app.use("*", async (c, next) => {
 	await next();
 });
 
-app.use("/api/tasks/*", requireAuth);
-app.use("/api/auth/me", requireAuth);
+app.use("*", requireAuth);
 
 app.onError(handleError);
 app.notFound(handleNotFound);
