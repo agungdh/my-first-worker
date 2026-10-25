@@ -11,10 +11,25 @@ const app = new Hono<AppEnv>();
 
 const localOrigin = /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/;
 
+function parseOrigins(value: string | undefined): string[] {
+	return (value ?? "")
+		.split(",")
+		.map((origin) => origin.trim())
+		.filter(Boolean);
+}
+
 app.use(
 	"*",
 	cors({
-		origin: (origin) => (localOrigin.test(origin) ? origin : undefined),
+		origin: (origin, c) => {
+			if (!origin) return undefined;
+
+			const configured = parseOrigins(c.env.CORS_ORIGINS);
+			const allowed =
+				configured.length > 0 ? configured.includes(origin) : localOrigin.test(origin);
+
+			return allowed ? origin : undefined;
+		},
 		credentials: true,
 		allowMethods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
 		allowHeaders: ["Content-Type"],

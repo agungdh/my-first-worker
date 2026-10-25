@@ -11,6 +11,11 @@
 		"enabled": true
 	},
 	"upload_source_maps": true,
+	"vars": {
+		// Production SPA origins allowed to call this API with credentials.
+		// Comma-separated; local development origins live in .dev.vars instead.
+		"CORS_ORIGINS": "https://rakawik.my.id"
+	},
 	"d1_databases": [
 		{
 			"binding": "DB",
