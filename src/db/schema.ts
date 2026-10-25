@@ -61,3 +61,23 @@ export const images = sqliteTable(
 
 export type ImageRow = typeof images.$inferSelect;
 export type NewImageRow = typeof images.$inferInsert;
+
+export const files = sqliteTable(
+	"files",
+	{
+		id: integer("id").primaryKey({ autoIncrement: true }),
+		key: text("key").notNull(),
+		filename: text("filename").notNull(),
+		contentType: text("content_type").notNull(),
+		size: integer("size").notNull(),
+		...auditColumns,
+	},
+	(table) => [
+		uniqueIndex("files_key_unique")
+			.on(sql`lower(${table.key})`)
+			.where(sql`${table.deletedAt} IS NULL`),
+	],
+);
+
+export type FileRow = typeof files.$inferSelect;
+export type NewFileRow = typeof files.$inferInsert;
