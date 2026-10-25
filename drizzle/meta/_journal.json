@@ -5,29 +5,8 @@
     {
       "idx": 0,
       "version": "6",
-      "when": 1792893650249,
-      "tag": "0000_bouncy_ego",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "6",
-      "when": 1792896020839,
-      "tag": "0001_material_mathemanic",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "6",
-      "when": 1792902793261,
-      "tag": "0002_chief_true_believers",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "6",
-      "when": 1792928564553,
-      "tag": "0003_bitter_wiccan",
+      "when": 1792933404907,
+      "tag": "0000_fancy_morg",
       "breakpoints": true
     }
   ]

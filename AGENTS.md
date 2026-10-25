@@ -92,32 +92,17 @@ Rules:
 - The guard returns a 401 JSON response directly instead of throwing chanfana's `UnauthorizedException`: `ApiException` is not a Hono `HTTPException`, so in middleware it would surface as a 500 through `app.onError`.
 - Chanfana drops headers set via `c.header()` when `handle()` returns a plain object. Any route that sets or clears a cookie MUST return `c.json(...)` so the `Set-Cookie` header survives.
 
-## Images (R2)
+## Object storage (R2)
 
-Image files live in the `my-first-worker-images` R2 bucket, upload straight from the browser through presigned URLs, and their metadata lives in the `images` table. Endpoints are in `src/modules/image/image.routes.ts`:
+Object storage is configured but not used by any module yet. When a module needs uploads, follow these conventions:
 
-| Endpoint | Purpose |
-|----------|---------|
-| `POST /api/images/presign` | Sign a short-lived (600s) `PUT` URL for an already compressed image |
-| `POST /api/images` | Confirm the upload; stores metadata after checking the object in R2 |
-| `GET /api/images` | List images with 1h presigned download URLs |
-| `GET /api/images/:imageId` | Fetch one image |
-| `PUT /api/images/:imageId` | Rename, or replace the file with a newly uploaded key |
-| `DELETE /api/images/:imageId` | Soft delete the row and remove the R2 object |
-
-Rules:
-
-- 2 MB (`MAX_IMAGE_BYTES`) is the hard limit. The frontend compresses before uploading and rejects anything still over the limit; the API also rejects any presign request above it.
-- Size is enforced at R2, not only at the API: the presigned `PUT` signs `content-length` (and `content-type`) via aws4fetch `allHeaders: true`, so a body with a different byte count fails with `403 SignatureDoesNotMatch`. R2 does not support presigned POST policies, so this is the only upload-time size enforcement.
-- Keys are server-generated as `images/<uuid>` (no extension) and validated with `IMAGE_KEY_PATTERN`. Never accept an arbitrary key from the client.
-- After uploading, the client calls `POST /api/images`. The service `HEAD`s the object, reads the real size and content type, and only then writes the row. Missing objects are rejected with 400.
-- `PUT` is a full replacement with `{ key, filename }`: a different key swaps the file and deletes the old object, the same key only renames.
-- Delete is soft in D1 and hard in R2.
-- Download URLs are presigned GETs valid for 1 hour, regenerated on every list/detail response.
+- Uploads go straight from the browser to R2 through presigned URLs (`aws4fetch`); file bytes never stream through the Worker. Presigned URLs always target the real bucket, so do not use the R2 binding for reads/deletes.
 - `R2_ACCOUNT_ID` and `R2_BUCKET` are vars in `wrangler.jsonc`; `R2_ACCESS_KEY_ID` and `R2_SECRET_ACCESS_KEY` are secrets (`.dev.vars`, `wrangler secret put ...`).
-- All R2 access goes through the S3 API with those credentials (`aws4fetch`), including `HEAD` and `DELETE`. Do not use the R2 binding for image reads/deletes: presigned URLs always target the real bucket, so a local binding in `wrangler dev` would read a different bucket than the browser uploaded to.
-- Local dev therefore needs real R2 credentials; point `.dev.vars` at a separate bucket with `R2_BUCKET` if dev uploads should not share data with production.
-- Bucket CORS lives in `r2-cors.json` and is applied with `npm run r2:cors`. It must allow the SPA origins for `GET`/`PUT`/`HEAD` with the `Content-Type` header, otherwise browser uploads fail at preflight.
+- Keys are server-generated as `<prefix>/<uuid>` with no extension. Never accept an arbitrary key from the client. The content type is read from the object (e.g. via `HEAD`), not encoded in the key.
+- If a per-object size limit is needed, sign `content-length` via `allHeaders: true`: R2 does not support presigned POST policies, so R2 itself is the only upload-time size enforcement.
+- Download URLs are presigned GETs with a short TTL, regenerated on every response instead of stored.
+- Local dev uses a separate bucket (`<prod-bucket>-dev`) set in `.dev.vars`, so dev and prod keep one code path without sharing data.
+- Bucket CORS lives in `r2-cors.json` and is applied with `npm run r2:cors` / `npm run r2:cors:dev`. It must allow the SPA origins for `GET`/`PUT`/`HEAD` with the `Content-Type` header, otherwise browser uploads fail at preflight.
 
 ## API conventions
 

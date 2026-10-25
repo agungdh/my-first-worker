@@ -1,11 +1,11 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "4b10efc5-4381-4872-ba6f-e6f060fc1443",
+  "id": "05002980-cb26-4918-b9de-a6c4f6ac57ac",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
-    "tasks": {
-      "name": "tasks",
+    "users": {
+      "name": "users",
       "columns": {
         "id": {
           "name": "id",
@@ -14,6 +14,13 @@
           "notNull": true,
           "autoincrement": true
         },
+        "username": {
+          "name": "username",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
         "name": {
           "name": "name",
           "type": "text",
@@ -21,30 +28,8 @@
           "notNull": true,
           "autoincrement": false
         },
-        "slug": {
-          "name": "slug",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "description": {
-          "name": "description",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "completed": {
-          "name": "completed",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": false
-        },
-        "due_date": {
-          "name": "due_date",
+        "password_hash": {
+          "name": "password_hash",
           "type": "text",
           "primaryKey": false,
           "notNull": true,
@@ -94,13 +79,13 @@
         }
       },
       "indexes": {
-        "tasks_slug_unique": {
-          "name": "tasks_slug_unique",
+        "users_username_unique": {
+          "name": "users_username_unique",
           "columns": [
-            "lower(\"slug\")"
+            "lower(\"username\")"
           ],
           "isUnique": true,
-          "where": "\"tasks\".\"deleted_at\" IS NULL"
+          "where": "\"users\".\"deleted_at\" IS NULL"
         }
       },
       "foreignKeys": {},
@@ -118,9 +103,9 @@
   },
   "internal": {
     "indexes": {
-      "tasks_slug_unique": {
+      "users_username_unique": {
         "columns": {
-          "lower(\"slug\")": {
+          "lower(\"username\")": {
             "isExpression": true
           }
         }

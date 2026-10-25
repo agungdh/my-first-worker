@@ -2,27 +2,6 @@ import { sql } from "drizzle-orm";
 import { sqliteTable, text, integer, uniqueIndex } from "drizzle-orm/sqlite-core";
 import { auditColumns } from "./audit";
 
-export const tasks = sqliteTable(
-	"tasks",
-	{
-		id: integer("id").primaryKey({ autoIncrement: true }),
-		name: text("name").notNull(),
-		slug: text("slug").notNull(),
-		description: text("description"),
-		completed: integer("completed", { mode: "boolean" }).notNull().default(false),
-		dueDate: text("due_date").notNull(),
-		...auditColumns,
-	},
-	(table) => [
-		uniqueIndex("tasks_slug_unique")
-			.on(sql`lower(${table.slug})`)
-			.where(sql`${table.deletedAt} IS NULL`),
-	],
-);
-
-export type Task = typeof tasks.$inferSelect;
-export type NewTask = typeof tasks.$inferInsert;
-
 export const users = sqliteTable(
 	"users",
 	{
@@ -41,43 +20,3 @@ export const users = sqliteTable(
 
 export type UserRow = typeof users.$inferSelect;
 export type NewUserRow = typeof users.$inferInsert;
-
-export const images = sqliteTable(
-	"images",
-	{
-		id: integer("id").primaryKey({ autoIncrement: true }),
-		key: text("key").notNull(),
-		filename: text("filename").notNull(),
-		contentType: text("content_type").notNull(),
-		size: integer("size").notNull(),
-		...auditColumns,
-	},
-	(table) => [
-		uniqueIndex("images_key_unique")
-			.on(sql`lower(${table.key})`)
-			.where(sql`${table.deletedAt} IS NULL`),
-	],
-);
-
-export type ImageRow = typeof images.$inferSelect;
-export type NewImageRow = typeof images.$inferInsert;
-
-export const files = sqliteTable(
-	"files",
-	{
-		id: integer("id").primaryKey({ autoIncrement: true }),
-		key: text("key").notNull(),
-		filename: text("filename").notNull(),
-		contentType: text("content_type").notNull(),
-		size: integer("size").notNull(),
-		...auditColumns,
-	},
-	(table) => [
-		uniqueIndex("files_key_unique")
-			.on(sql`lower(${table.key})`)
-			.where(sql`${table.deletedAt} IS NULL`),
-	],
-);
-
-export type FileRow = typeof files.$inferSelect;
-export type NewFileRow = typeof files.$inferInsert;
