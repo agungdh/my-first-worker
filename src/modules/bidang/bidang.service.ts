@@ -17,20 +17,11 @@ export class BidangService {
 	}
 
 	async create(input: BidangInput, actorId: number): Promise<void> {
-		if (await this.repo.existsByName(input.bidang)) {
-			throw new ConflictException("Bidang already exists");
-		}
-
 		await this.repo.create(input, actorId);
 	}
 
 	async update(id: number, input: BidangInput, actorId: number): Promise<void> {
 		await this.get(id);
-
-		if (await this.repo.existsByName(input.bidang, id)) {
-			throw new ConflictException("Bidang already exists");
-		}
-
 		await this.repo.update(id, input, actorId);
 	}
 

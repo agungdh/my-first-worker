@@ -17,20 +17,11 @@ export class PangkatGolonganService {
 	}
 
 	async create(input: PangkatGolonganInput, actorId: number): Promise<void> {
-		if (await this.repo.existsByValues(input)) {
-			throw new ConflictException("Pangkat golongan already exists");
-		}
-
 		await this.repo.create(input, actorId);
 	}
 
 	async update(id: number, input: PangkatGolonganInput, actorId: number): Promise<void> {
 		await this.get(id);
-
-		if (await this.repo.existsByValues(input, id)) {
-			throw new ConflictException("Pangkat golongan already exists");
-		}
-
 		await this.repo.update(id, input, actorId);
 	}
 

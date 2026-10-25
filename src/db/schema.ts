@@ -2,39 +2,23 @@ import { sql } from "drizzle-orm";
 import { index, integer, sqliteTable, text, uniqueIndex } from "drizzle-orm/sqlite-core";
 import { auditColumns } from "./audit";
 
-export const bidangs = sqliteTable(
-	"bidangs",
-	{
-		id: integer("id").primaryKey({ autoIncrement: true }),
-		bidang: text("bidang").notNull(),
-		...auditColumns,
-	},
-	(table) => [
-		uniqueIndex("bidangs_bidang_unique")
-			.on(sql`lower(${table.bidang})`)
-			.where(sql`${table.deletedAt} IS NULL`),
-	],
-);
+export const bidangs = sqliteTable("bidangs", {
+	id: integer("id").primaryKey({ autoIncrement: true }),
+	bidang: text("bidang").notNull(),
+	...auditColumns,
+});
 
 export type BidangRow = typeof bidangs.$inferSelect;
 export type NewBidangRow = typeof bidangs.$inferInsert;
 
-export const pangkatGolongans = sqliteTable(
-	"pangkat_golongans",
-	{
-		id: integer("id").primaryKey({ autoIncrement: true }),
-		jenjang: text("jenjang").notNull(),
-		pangkat: text("pangkat").notNull(),
-		golongan: text("golongan").notNull(),
-		ruang: text("ruang").notNull(),
-		...auditColumns,
-	},
-	(table) => [
-		uniqueIndex("pangkat_golongans_unique")
-			.on(sql`lower(${table.pangkat})`, sql`lower(${table.golongan})`, sql`lower(${table.ruang})`)
-			.where(sql`${table.deletedAt} IS NULL`),
-	],
-);
+export const pangkatGolongans = sqliteTable("pangkat_golongans", {
+	id: integer("id").primaryKey({ autoIncrement: true }),
+	jenjang: text("jenjang").notNull(),
+	pangkat: text("pangkat").notNull(),
+	golongan: text("golongan").notNull(),
+	ruang: text("ruang").notNull(),
+	...auditColumns,
+});
 
 export type PangkatGolonganRow = typeof pangkatGolongans.$inferSelect;
 export type NewPangkatGolonganRow = typeof pangkatGolongans.$inferInsert;

@@ -103,6 +103,7 @@ Rules:
 - Audit columns are internal only. Never add them to domain types (`src/modules/*/*.domain.ts`), Zod/OpenAPI schemas (`src/modules/*/*.schema.ts`), endpoint payloads, or API responses. Repositories map DB rows to domain objects and must drop audit fields.
 - Deletes are soft: set `deleted_at` / `deleted_by` instead of removing rows. Repositories extend `BaseRepository` (`src/db/baseRepository.ts`) and every read (list, get, update target) MUST filter through `liveWhere(...)`, which adds `isNull(table.deletedAt)`.
 - Unique constraints MUST be partial unique indexes scoped to live rows and case-insensitive: `uniqueIndex("...").on(sql`lower(${table.column})`).where(sql`${table.deletedAt} IS NULL`)`. Never use `.unique()` on a column, otherwise a soft-deleted row keeps blocking reuse of that value.
+- Exception: `bidangs.bidang` and `pangkat_golongans` are intentionally NOT unique (parity with the legacy app). Do not add unique indexes there; duplicates are only prevented by the idempotent seed script, not by the database.
 - Queries that filter by a unique text column (get, update, delete target) MUST compare with `lower(column)` too (e.g. `eq(sql`lower(${table.slug})`, value.toLowerCase())`). Otherwise a row stored with different casing won't match the uniqueness semantics of the index.
 - Queries must never use `SELECT *` (bare `.select()` / `.returning()`). Repositories project only the columns needed for the domain/DTO and exclude audit columns, which are internal and never exposed. Applies to both `select()` and `returning()`.
 

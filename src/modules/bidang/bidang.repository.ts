@@ -30,21 +30,6 @@ export class BidangRepository extends BaseRepository<typeof bidangs> {
 		return row ?? null;
 	}
 
-	async existsByName(bidang: string, excludeId?: number): Promise<boolean> {
-		const row = await this.db
-			.select({ id: bidangs.id })
-			.from(bidangs)
-			.where(
-				this.liveWhere(
-					eq(sql`lower(${bidangs.bidang})`, bidang.toLowerCase()),
-					excludeId === undefined ? undefined : sql`${bidangs.id} <> ${excludeId}`,
-				),
-			)
-			.get();
-
-		return Boolean(row);
-	}
-
 	async create(input: BidangInput, actorId: number): Promise<void> {
 		await this.db.insert(bidangs).values({
 			bidang: input.bidang,

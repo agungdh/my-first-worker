@@ -46,23 +46,6 @@ export class PangkatGolonganRepository extends BaseRepository<typeof pangkatGolo
 		return row ?? null;
 	}
 
-	async existsByValues(input: PangkatGolonganInput, excludeId?: number): Promise<boolean> {
-		const row = await this.db
-			.select({ id: pangkatGolongans.id })
-			.from(pangkatGolongans)
-			.where(
-				this.liveWhere(
-					eq(sql`lower(${pangkatGolongans.pangkat})`, input.pangkat.toLowerCase()),
-					eq(sql`lower(${pangkatGolongans.golongan})`, input.golongan.toLowerCase()),
-					eq(sql`lower(${pangkatGolongans.ruang})`, input.ruang.toLowerCase()),
-					excludeId === undefined ? undefined : sql`${pangkatGolongans.id} <> ${excludeId}`,
-				),
-			)
-			.get();
-
-		return Boolean(row);
-	}
-
 	async create(input: PangkatGolonganInput, actorId: number): Promise<void> {
 		await this.db.insert(pangkatGolongans).values({
 			...input,

@@ -1,7 +1,7 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "97cfadb6-ef73-4cf6-9eff-c0b6ba679d78",
+  "id": "521b20a0-4983-4a06-9529-b2507cfcd176",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "bidangs": {
@@ -64,16 +64,7 @@
           "autoincrement": false
         }
       },
-      "indexes": {
-        "bidangs_bidang_unique": {
-          "name": "bidangs_bidang_unique",
-          "columns": [
-            "lower(\"bidang\")"
-          ],
-          "isUnique": true,
-          "where": "\"bidangs\".\"deleted_at\" IS NULL"
-        }
-      },
+      "indexes": {},
       "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {},
@@ -160,18 +151,7 @@
           "autoincrement": false
         }
       },
-      "indexes": {
-        "pangkat_golongans_unique": {
-          "name": "pangkat_golongans_unique",
-          "columns": [
-            "lower(\"pangkat\")",
-            "lower(\"golongan\")",
-            "lower(\"ruang\")"
-          ],
-          "isUnique": true,
-          "where": "\"pangkat_golongans\".\"deleted_at\" IS NULL"
-        }
-      },
+      "indexes": {},
       "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {},
@@ -380,26 +360,6 @@
   },
   "internal": {
     "indexes": {
-      "bidangs_bidang_unique": {
-        "columns": {
-          "lower(\"bidang\")": {
-            "isExpression": true
-          }
-        }
-      },
-      "pangkat_golongans_unique": {
-        "columns": {
-          "lower(\"pangkat\")": {
-            "isExpression": true
-          },
-          "lower(\"golongan\")": {
-            "isExpression": true
-          },
-          "lower(\"ruang\")": {
-            "isExpression": true
-          }
-        }
-      },
       "users_nip_unique": {
         "columns": {
           "lower(\"nip\")": {

@@ -9,7 +9,6 @@ CREATE TABLE `bidangs` (
 	`deleted_by` integer
 );
 --> statement-breakpoint
-CREATE UNIQUE INDEX `bidangs_bidang_unique` ON `bidangs` (lower("bidang")) WHERE "bidangs"."deleted_at" IS NULL;--> statement-breakpoint
 CREATE TABLE `pangkat_golongans` (
 	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
 	`jenjang` text NOT NULL,
@@ -24,7 +23,6 @@ CREATE TABLE `pangkat_golongans` (
 	`deleted_by` integer
 );
 --> statement-breakpoint
-CREATE UNIQUE INDEX `pangkat_golongans_unique` ON `pangkat_golongans` (lower("pangkat"),lower("golongan"),lower("ruang")) WHERE "pangkat_golongans"."deleted_at" IS NULL;--> statement-breakpoint
 CREATE TABLE `users` (
 	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
 	`nip` text NOT NULL,
