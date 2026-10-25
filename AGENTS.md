@@ -149,8 +149,7 @@ Object storage is configured but not used by any module yet. When a module needs
 
 ## API conventions
 
-- Create and update endpoints return `{ success: true }` only; they do not echo the created/updated entity. The identity needed for auth (e.g. pegawai for JWT signing) may be kept internally but must not be exposed in the response.
-- Delete endpoints may return the removed entity when useful.
+- Create, update, and delete endpoints return `{ success: true }` only; they never echo the created/updated/removed entity. The identity needed for auth (e.g. pegawai for JWT signing) may be kept internally but must not be exposed in the response.
 - List endpoints paginate via a `page` query param (0-based). Page size is defined once in `src/shared/config.ts` (`PAGE_SIZE`, default 20) — change it there, not per repository.
 - Request bodies are `z.strictObject`: unknown properties are rejected. Updates are true PUT: every non-password field is required, and nullable fields must be present (as `null` when empty).
 - API payloads use snake_case (`nip`, `nama`, `bidang_id`, `pangkat_golongan_id`, `kategori_jabatan`, `kategori_kebutuhan_jam_pelatihan`); domain types and Drizzle columns stay camelCase internally.
