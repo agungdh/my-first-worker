@@ -1,7 +1,7 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "4397ad1c-99b0-48da-b2b2-5ccbd9561a42",
+  "id": "4b10efc5-4381-4872-ba6f-e6f060fc1443",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "tasks": {
@@ -97,7 +97,7 @@
         "tasks_slug_unique": {
           "name": "tasks_slug_unique",
           "columns": [
-            "slug"
+            "lower(\"slug\")"
           ],
           "isUnique": true,
           "where": "\"tasks\".\"deleted_at\" IS NULL"
@@ -117,6 +117,14 @@
     "columns": {}
   },
   "internal": {
-    "indexes": {}
+    "indexes": {
+      "tasks_slug_unique": {
+        "columns": {
+          "lower(\"slug\")": {
+            "isExpression": true
+          }
+        }
+      }
+    }
   }
 }

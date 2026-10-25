@@ -15,7 +15,7 @@ export const tasks = sqliteTable(
 	},
 	(table) => [
 		uniqueIndex("tasks_slug_unique")
-			.on(table.slug)
+			.on(sql`lower(${table.slug})`)
 			.where(sql`${table.deletedAt} IS NULL`),
 	],
 );

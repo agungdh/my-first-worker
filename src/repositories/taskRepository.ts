@@ -1,4 +1,4 @@
-import { and, eq, isNull } from "drizzle-orm";
+import { and, eq, isNull, sql } from "drizzle-orm";
 import { createDb } from "../db";
 import { tasks } from "../db/schema";
 import { auditCreate, auditDelete, auditUpdate } from "../db/audit";
@@ -31,7 +31,7 @@ export class TaskRepository {
 		const row = await this.db
 			.select()
 			.from(tasks)
-			.where(and(eq(tasks.slug, slug), isNull(tasks.deletedAt)))
+			.where(this.liveSlugWhere(slug))
 			.get();
 		if (!row) return null;
 		return this.toTask(row);
@@ -66,7 +66,7 @@ export class TaskRepository {
 		const [updated] = await this.db
 			.update(tasks)
 			.set({ ...setValues, ...auditUpdate() })
-			.where(and(eq(tasks.slug, slug), isNull(tasks.deletedAt)))
+			.where(this.liveSlugWhere(slug))
 			.returning();
 
 		if (!updated) return null;
@@ -78,9 +78,16 @@ export class TaskRepository {
 		const [deleted] = await this.db
 			.update(tasks)
 			.set(auditDelete())
-			.where(and(eq(tasks.slug, slug), isNull(tasks.deletedAt)))
+			.where(this.liveSlugWhere(slug))
 			.returning();
 		return !!deleted;
+	}
+
+	private liveSlugWhere(slug: string) {
+		return and(
+			eq(sql`lower(${tasks.slug})`, slug.toLowerCase()),
+			isNull(tasks.deletedAt),
+		);
 	}
 
 	private toTask(row: typeof tasks.$inferSelect): Task {
